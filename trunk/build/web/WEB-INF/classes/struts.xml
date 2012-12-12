@@ -1,0 +1,24 @@
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+"http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>    
+    <package name="default" extends="struts-default" >
+        <global-results>
+            <result name="success">do/success.jsp</result>
+            <result name="error">do/error.jsp</result>
+            <result name="login">login.jsp</result>
+            <result name="input">do/input.jsp</result>
+        </global-results>
+        <action name="PostQuery" class="com.fastlearn.action.PostQueryAction">
+        </action>
+        <action name="AnswerQuery" class="com.fastlearn.action.AnswerQueryAction">
+        </action>
+        <action name="SendFeedback" class="com.fastlearn.action.SendFeedbackAction">
+        </action>
+        <action name="EditCourse" class="com.fastlearn.action.EditCourseAction">
+        </action>
+        <action name="AddCourse" class="com.fastlearn.action.AddCourseAction">
+        </action>
+    </package>
+</struts>
