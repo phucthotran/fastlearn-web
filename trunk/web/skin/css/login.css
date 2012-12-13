@@ -1,0 +1,46 @@
+@import "fonts.css";
+@import "custom.css";
+
+body {
+    background: #82BA15;
+}
+
+#loginBlock {
+    width: 450px;
+    overflow: hidden;
+    margin-top: 50px;
+    padding: 10px;
+}
+
+#loginBlock .blockTitle {
+    background: transparent url('../login.png') left center no-repeat;
+    padding-left: 55px;
+    height: 50px;
+    line-height: 50px;
+    margin-bottom: 5px;
+}
+
+#loginBlock .blockContent {
+    padding: 30px;
+}
+
+#loginBlock .blockContent p {
+    margin: 5px 0;
+    overflow: hidden;
+}
+
+#loginBlock .blockContent p .solidTextbox {
+    width: 250px;
+}
+
+#loginBlock .blockContent p span {
+    display: inline-block;
+    width: 100px;
+}
+
+#loginBlock .navigator {
+    border-top: 1px solid #8AD31C;
+    overflow: hidden;
+    padding: 5px 10px 5px 10px;
+    margin-top: 10px;
+}

@@ -1,0 +1,152 @@
+h1, h2, h3, h4, h5, h6 {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 36px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+h3 {
+    font-size: 24px;
+}
+
+h4 {
+    font-size: 20px;
+}
+
+h5 {
+    font-size: 16px;
+}
+
+h6 {
+    font-size: 12px;
+}
+
+li {
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+input, select, textarea {
+    border: none;
+    padding: 5px;
+}
+
+textarea.solidTextarea {
+    height: 100px;
+    width: 250px;
+}
+
+input.solidTextbox {
+    height: 30px;
+}
+
+input.redButton {
+    background: #B11D01;
+    text-align: center;
+    padding: 8px 15px;
+    color: #fff;
+    text-transform: uppercase;
+    font-family: 'SegoeUI' !important;
+}
+
+.redBlock, .redDarkBlock, .orangeBlock, .blueBlock, .greenBlock, .brownBlock {
+    padding: 10px;
+    margin: 5px;
+    text-align: center;
+}
+
+.redBlock {
+    background: #B91D1E;
+}
+
+.redDarkBlock {
+    background: #B11D01;
+}
+
+.orangeBlock {
+    background: #D39D09;
+}
+
+.greenBlock {
+    background: #82BA15;
+}
+
+.blueBlock {
+    background: #1957BA;
+}
+
+.brownBlock {
+    background: #311600;
+}
+
+.transparentBlock {
+    padding: 5px 10px 5px 10px;
+    margin: 5px;
+    background: transparent url('../transparent.png');
+}
+
+.clear {
+    height: 1px;
+    display: block;
+    clear: both;
+}
+
+.clearLeft {
+    clear: left;
+}
+
+.clearRight {
+    clear: right;
+}
+
+.floatLeft {
+    float: left;
+}
+
+.floatRight {
+    float: right;
+}
+
+.textLeft {
+    text-align: left;
+}
+
+.textCenter {
+    text-align: center;
+}
+
+.center {
+    margin: 0 auto;
+}
+
+.wrappCenter {
+    width: 960px;
+    margin: 0 auto;
+}
+
+* { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+* { padding: 0; margin: 0; }
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+body {
+    font-family: 'SegoeUI' !important;
+    font-size: 14px;
+    color: #fff;
+    text-align: left;
+
+}
