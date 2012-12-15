@@ -1,6 +1,7 @@
 package controller;
 
-import com.fastlearn.controller.QueryFacadeRemote;
+import com.fastlearn.controller.*;
+import com.fastlearn.entity.*;
 import java.io.IOException;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -28,8 +29,9 @@ public class QueryServlet extends HttpServlet {
     throws ServletException, IOException {
         processRequest(request, response);
         int id = Integer.parseInt(request.getParameter("id"));
-        
-        queryRm.remove(id);
+
+        Query qr = queryRm.find(id);
+        queryRm.remove(qr);
 
         request.setAttribute("message", "Remove query success");
         request.getRequestDispatcher("../do/success.jsp").forward(request, response);

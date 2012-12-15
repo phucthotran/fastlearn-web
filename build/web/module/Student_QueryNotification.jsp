@@ -4,7 +4,7 @@
     <div style="height: 24px; background: transparent url('skin/closeNotification.png') 97% center no-repeat; cursor: pointer" title="Tắt" onclick="closeNotification()"></div>
     <c:forEach var="q" items="${lstQuery}">
         <li>
-            <p>${q.title}</p>
+            <p>${q.query.title}</p>
             <p>${q.dateOfResponse}</p>
         </li>
     </c:forEach>
