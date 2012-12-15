@@ -41,6 +41,8 @@ public class StudentServlet extends HttpServlet {
     @EJB
     private QueryFacadeRemote queryRm;
     @EJB
+    private QueryDetailsFacadeRemote queryDetailsRm;
+    @EJB
     private FeedbackFacadeRemote fbRm;
     private String pathToPerform;
     private String forwardPage;
@@ -81,7 +83,7 @@ public class StudentServlet extends HttpServlet {
                     lstFaculty.add(details.getFaculty());
             }
 
-            List<Query> lstQuery = queryRm.getStudentUnresponse(studentID);           
+            List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(studentID);
 
             request.setAttribute("VIEWTYPE", "FULL");
             request.setAttribute("lstFaculty", lstFaculty);
@@ -95,7 +97,7 @@ public class StudentServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             String studentID = "FL00000001";
 
-            List<Query> lstQuery = queryRm.getStudentUnresponse(studentID);
+            List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(studentID);
 
             request.setAttribute("VIEWTYPE", "QUERY");
             request.setAttribute("student", studentRm.find(studentID));
@@ -108,7 +110,7 @@ public class StudentServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             String studentID = "FL00000001";
 
-            List<Query> lstQuery = queryRm.getStudentUnresponse(studentID);
+            List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(studentID);
 
             request.setAttribute("VIEWTYPE", "COURSE");
             request.setAttribute("student", studentRm.find(studentID));
@@ -213,8 +215,11 @@ public class StudentServlet extends HttpServlet {
                 forwardPage = "../login.jsp";
             }
             else {
-                Query postQuery = new Query(title, queryText, studentID, facultyID);
-                queryRm.insert(postQuery);
+                Query postQuery = new Query(title);
+                QueryDetails queryDetails = new QueryDetails(studentID, facultyID, queryText);
+                queryDetails.setQuery(postQuery);
+
+                queryDetailsRm.insert(queryDetails);
 
                 setMessage("Post query success");
                 request.setAttribute("message", message);

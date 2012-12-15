@@ -29,6 +29,8 @@ public class FacultyServlet extends HttpServlet {
     private MessageFacadeRemote messageRm;
     @EJB
     private QueryFacadeRemote queryRm;
+    @EJB
+    private QueryDetailsFacadeRemote queryDetailsRm;
     private String pathToPerform;
     private String forwardPage;
 
@@ -49,7 +51,7 @@ public class FacultyServlet extends HttpServlet {
         if(pathToPerform.equals("/Faculty")) {
             String facultyID = "FL00000002";
 
-            List<Query> lstQuery = queryRm.getFacultyUnresponse(facultyID);
+            List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(facultyID);
 
             request.setAttribute("VIEWTYPE", "FULL");
             request.setAttribute("faculty", facultyRm.find(facultyID));
@@ -62,7 +64,7 @@ public class FacultyServlet extends HttpServlet {
             String facultyID = "FL00000002";
             int id = Integer.parseInt(request.getParameter("id"));
 
-            List<Query> lstQuery = queryRm.getFacultyUnresponse(facultyID);
+            List<QueryDetails> lstQuery = queryDetailsRm.getFacultyNotification(facultyID);
 
             request.setAttribute("VIEWTYPE", "QUERY");
             request.setAttribute("faculty", facultyRm.find(facultyID));
@@ -80,7 +82,7 @@ public class FacultyServlet extends HttpServlet {
         processRequest(request, response);
 
         if(pathToPerform.equals("/Faculty/Query/ResponseAction")) {
-            Integer queryID = Integer.parseInt(request.getParameter("queryID"));
+            Integer id = Integer.parseInt(request.getParameter("queryID"));
             String facultyID = request.getParameter("facultyID");
             String responseText = request.getParameter("responseText");
 
@@ -90,11 +92,11 @@ public class FacultyServlet extends HttpServlet {
                 forwardPage = "../login.jsp";
             }
             else {
-                Query responseQuery = queryRm.find(queryID);
+                QueryDetails responseQuery = queryDetailsRm.find(id);
                 responseQuery.setResponseText(responseText);
                 responseQuery.setDateOfResponse(Calendar.getInstance().getTime());
 
-                queryRm.update(responseQuery);
+                queryDetailsRm.update(responseQuery);
 
                 setMessage("Answer query success");
                 request.setAttribute("message", message);

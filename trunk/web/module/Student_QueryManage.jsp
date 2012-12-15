@@ -11,9 +11,9 @@
             <th width="24"></th>
             <th width="24"></th>
         </tr>
-        <c:forEach var="q" items="${s.queries}">
+        <c:forEach var="q" items="${s.queryDetails}">
             <tr>
-                <td>${q.title}</td>
+                <td>${q.query.title}</td>
                 <td>${q.faculty.name}</td>
                 <td>${q.dateOfQuery}</td>
                 <td width="24"><a title="Chi tiết" class="detailsButton" target="_blank" href="Student/Query/View?id=${q.queryID}"></a></td>
