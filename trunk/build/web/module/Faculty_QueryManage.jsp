@@ -16,7 +16,7 @@
                 <td>${q.query.title}</td>
                 <td>${q.student.name}</td>
                 <td>${q.dateOfQuery}</td>
-                <td width="24"><a title="Chi tiết" class="detailsButton" target="_blank" href="Faculty/Query/View?id=${q.queryID}"></a></td>
+                <td width="24"><a title="Chi tiết" class="detailsButton" target="_blank" href="${hostURL}/Faculty/Query/View?id=${q.queryID}"></a></td>
                 <td width="24"><span title="Xóa" class="removeButton" href="" onclick="removeQuery(${q.queryID})"></span></td>
             </tr>
         </c:forEach>

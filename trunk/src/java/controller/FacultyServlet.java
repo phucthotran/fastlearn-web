@@ -69,6 +69,7 @@ public class FacultyServlet extends HttpServlet {
             request.setAttribute("VIEWTYPE", "QUERY");
             request.setAttribute("faculty", facultyRm.find(facultyID));
             request.setAttribute("query", queryRm.find(id));
+            request.setAttribute("lstQuery", lstQuery);
             request.setAttribute("faculty", facultyRm.find(facultyID));
             request.setAttribute("lstMessage", messageRm.forFaculty());
             forwardPage = "../../Faculty.jsp";

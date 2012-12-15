@@ -223,7 +223,7 @@ public class StudentServlet extends HttpServlet {
 
                 setMessage("Post query success");
                 request.setAttribute("message", message);
-                forwardPage = "../../do/success.jsp";
+                forwardPage = "../../do/success.jsp";                
             }
         }
         else if(pathToPerform.equals("/admin/Student/Update")) {
