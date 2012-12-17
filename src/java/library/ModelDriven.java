@@ -85,7 +85,7 @@ public class ModelDriven {
                 PropertyNames anotation = pNames_FIELD.get(i).getAnnotation(PropertyNames.class);
 
                 if(anotation.name().equalsIgnoreCase(MDO_NAME)) {
-                    pNames = (String[])pNames_FIELD.get(i).get(pNames);
+                    pNames = (String[])pNames_FIELD.get(i).get(clazz.newInstance());
                     pNames_FIELD_POS = i;
                     break;
                 }
@@ -95,7 +95,7 @@ public class ModelDriven {
                 PropertyValues anotation = pValues_FIELD.get(i).getAnnotation(PropertyValues.class);
 
                 if(anotation.name().equalsIgnoreCase(MDO_NAME)) {
-                    pValues = (String[])pValues_FIELD.get(i).get(pValues);
+                    pValues = (String[])pValues_FIELD.get(i).get(clazz.newInstance());
                     pValues_FIELD_POS = i;
                     break;
                 }

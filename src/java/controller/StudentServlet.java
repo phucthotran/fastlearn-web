@@ -51,11 +51,11 @@ public class StudentServlet extends HttpServlet {
     private FeedbackFacadeRemote fbRm;
 
     @PropertyNames(name = "std")
-    private String[] properyNames;
+    private static String[] properyNames;
     @PropertyValues(name = "std")
-    private String[] propertyValues;
+    private static String[] propertyValues;
     @MDO(name = "std")
-    private Student std;
+    private static Student std;
 
     private String pathToPerform;
     private String forwardPage;
