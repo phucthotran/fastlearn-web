@@ -1,2 +1,0 @@
-<h1>Error</h1>
-<h3>${message}</h3>
