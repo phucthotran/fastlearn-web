@@ -17,35 +17,30 @@
         <script type="text/javascript">
             $(function(){
                 $('#btnFind').click(function(){
-                    var findText = $("#findText").val();
-                    var findType = $("#findType").val();
-
-                    $.ajax({
-                        type: 'GET',
-                        url: '${hostURL}/admin/Student/Find',
-                        dataType: 'html',
-                        data: { findtext : findText, findtype : findType},
-                        success: function(data) {
+                    $.get('${hostURL}/admin/Student/Find', $('#fFindSudent').serialize(),
+                        function(data) {
                             $('#result').html(data);
                         }
-                    });
+                    );
                 });
             });
         </script>
     </head>
     <body>
         <h1>Student</h1>
-        <p>Find: <input type="text" id="findText"/>&nbsp;
-            By
-            <select id="findType">
-                <option value="name">Name</option>
-                <option value="email">Email</option>
-                <option value="address">Address</option>
-            </select>&nbsp;
-            <input type="button" id="btnFind" value="Find"/>
-        </p>
-        <div id="result">
-        </div>
+        <form id="fFindSudent">
+            <p>Find: <input type="text" name="findText"/>&nbsp;
+                By
+                <select name="findType">
+                    <option value="name">Name</option>
+                    <option value="email">Email</option>
+                    <option value="address">Address</option>
+                </select>&nbsp;
+                <input type="button" id="btnFind" value="Find"/>
+            </p>
+            <div id="result">
+            </div>
+        </form>
         <c:forEach var="s" items="${lstStudent}">
             <li>Name: ${s.name}, Email: ${s.email}, Address: ${s.address}&nbsp;
                 [<a href="${hostURL}/admin/Student/Info?id=${s.studentID}">Details</a>]

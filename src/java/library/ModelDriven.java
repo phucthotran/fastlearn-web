@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import anotation.*;
+import java.util.HashMap;
 
 /**
  *
@@ -19,6 +20,28 @@ public class ModelDriven {
         request = servletRequest;
     }
 
+    public static HashMap<String, String> getPropertySets(){
+        HashMap<String, String> propertySets = new HashMap<String, String>();
+        ArrayList<String> propertyNames = new ArrayList<String>();
+        ArrayList<String> propertyValues = new ArrayList<String>();
+
+        for(String name : request.getParameterMap().keySet()) {
+            propertyNames.add(name.toLowerCase());
+        }
+
+        for(String[] values : request.getParameterMap().values()) {
+            for(String value : values) {
+                propertyValues.add(value);
+            }
+        }
+
+        for(int i = 0; i < propertyNames.size() && i < propertyValues.size(); i++){
+            propertySets.put(propertyNames.get(i), propertyValues.get(i));
+        }
+
+        return propertySets;
+    }
+    /*
     public static String[] getPropertyNames() {
         ArrayList<String> propertyNames = new ArrayList<String>();
         String[] pNames;
@@ -53,8 +76,113 @@ public class ModelDriven {
         }
 
         return pValues;
+    }*/
+
+    /*
+    public static void parser(Class<?> clazz) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
+        Field[] fields = clazz.getDeclaredFields();
+        HashMap<String, String> pSets = null;
+        int pSets_FIELD_POS = -1;
+        ArrayList<Field> pSets_FIELD = new ArrayList<Field>();
+        ArrayList<Field> MDO_FIELD = new ArrayList<Field>();
+
+        for(Field f :fields) {
+            f.setAccessible(true);
+            if(f.isAnnotationPresent(PropertySets.class)){
+                pSets_FIELD.add(f);
+            }
+            else if(f.isAnnotationPresent(MDO.class)){
+                MDO_FIELD.add(f);
+            }
+        }
+
+        for(Field f : MDO_FIELD) {
+            String MDO_NAME = f.getAnnotation(MDO.class).name();
+
+            for(int i = 0; i < pSets_FIELD.size(); i++) {
+                PropertySets anotation = pSets_FIELD.get(i).getAnnotation(PropertySets.class);
+
+                if(anotation.name().equalsIgnoreCase(MDO_NAME)) {
+                    pSets = (HashMap<String, String>)pSets_FIELD.get(i).get(clazz.newInstance());
+                    pSets_FIELD_POS = i;
+                    break;
+                }
+            }
+
+            if(pSets != null) {
+                if(pSets_FIELD_POS != -1){
+                    Class<?> c = f.getType();
+                    f.set(c, build(c, pSets));
+                }
+            }
+        }
+    }
+    */
+
+    public static void parser(Class<?> clazz) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
+        Field[] fields = clazz.getDeclaredFields();
+        HashMap<String, String> pSets = getPropertySets();
+
+        for(Field f : fields) {
+            f.setAccessible(true);
+            if(f.isAnnotationPresent(MDO.class)){
+                if(pSets != null) {
+                    Class<?> c = f.getType();
+                    f.set(c, build(c, pSets));
+                }
+            }
+        }
     }
 
+    private static Object build(Class<?> objectClass, HashMap<String, String> paramSets) {
+        Class<?> c = objectClass;
+        Object obj = null;
+        try {
+            obj = objectClass.newInstance();
+            //Find "set" method and invoke it
+            for (Method m : c.getDeclaredMethods()) {
+                if (m.getName().startsWith("set")) {
+                    String propertyMethod = m.getName().substring(3).toLowerCase();
+                    //System.out.println(propertyMethod);
+                    for (int i = 0; i < paramSets.size(); i++) {
+                        if (paramSets.containsKey(propertyMethod)) {
+                            String propertyValue = paramSets.get(propertyMethod);
+                            Class<?> paramType = m.getParameterTypes()[0];
+                            Object convertedObj = propertyValue;
+
+                            if (paramType == Integer.class || paramType == int.class) {
+                                convertedObj = Integer.parseInt(propertyValue);
+                            } else if (paramType == Double.class || paramType == double.class) {
+                                convertedObj = Double.parseDouble(propertyValue);
+                            } else if (paramType == Long.class || paramType == long.class) {
+                                convertedObj = Long.parseLong(propertyValue);
+                            } else if (paramType == Float.class || paramType == float.class) {
+                                convertedObj = Float.parseFloat(propertyValue);
+                            } else if (paramType == Boolean.class || paramType == boolean.class) {
+                                convertedObj = Boolean.parseBoolean(propertyValue);
+                            }
+                            m.invoke(obj, convertedObj);
+                            //Method invokeMethod = c.getDeclaredMethod(m.getName(), new Class[]{ paramType });
+                            //invokeMethod.invoke(obj, new Object[] { tmpProperyValue });
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (InstantiationException ex) {
+            Logger.getLogger(ModelDriven.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ModelDriven.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(ModelDriven.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex)         {
+            Logger.getLogger(ModelDriven.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return obj;
+    }
+
+    /*
     public static void parser(Class<?> clazz) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
         Field[] fields = clazz.getDeclaredFields();
         String[] pNames = null;
@@ -70,7 +198,7 @@ public class ModelDriven {
             if(f.isAnnotationPresent(PropertyNames.class)){                
                 pNames_FIELD.add(f);
             }
-            else if(f.isAnnotationPresent(PropertyValues.class)){                
+            else if(f.isAnnotationPresent(PropertySets.class)){
                 pValues_FIELD.add(f);
             }
             else if(f.isAnnotationPresent(MDO.class)){                
@@ -80,6 +208,7 @@ public class ModelDriven {
 
         for(Field f : MDO_FIELD) {            
             String MDO_NAME = f.getAnnotation(MDO.class).name();
+
 
             for(int i = 0; i < pNames_FIELD.size(); i++){
                 PropertyNames anotation = pNames_FIELD.get(i).getAnnotation(PropertyNames.class);
@@ -92,7 +221,7 @@ public class ModelDriven {
             }
 
             for(int i = 0; i < pValues_FIELD.size(); i++) {
-                PropertyValues anotation = pValues_FIELD.get(i).getAnnotation(PropertyValues.class);
+                PropertySets anotation = pValues_FIELD.get(i).getAnnotation(PropertySets.class);
 
                 if(anotation.name().equalsIgnoreCase(MDO_NAME)) {
                     pValues = (String[])pValues_FIELD.get(i).get(clazz.newInstance());
@@ -107,34 +236,11 @@ public class ModelDriven {
                     f.set(c, build(c, pNames, pValues));
                 }
             }
-        }
-        /*
-        for(Field f : fields) {
-            if(f.isAnnotationPresent(PropertyNames.class)){
-                PropertyNames anotation = f.getAnnotation(PropertyNames.class);
-                pNames_NAME_ATTR = anotation.name();
-                pNames = (String[])f.get(pNames);
-            }
-            else if(f.isAnnotationPresent(PropertyValues.class)){
-                PropertyValues anotation = f.getAnnotation(PropertyValues.class);
-                pValues_NAME_ATTR = anotation.name();
-                pValues = (String[])f.get(pValues);
-            }
-            else if(f.isAnnotationPresent(MDO.class)){
-                MDO anotation = f.getAnnotation(MDO.class);
-                MDO_NAME = anotation.name();
-
-                if(pNames  != null && pValues != null) {
-                    if(pNames_NAME_ATTR.equalsIgnoreCase(MDO_NAME) && pValues_NAME_ATTR.equalsIgnoreCase(MDO_NAME)){
-                        Class<?> c = f.getType();
-                        f.set(c, buildObject(c, pNames, pValues));
-                    }
-                }
-            }
-        }
-        */
+        } 
+        
     }
-
+    */
+    /*
     private static Object build(Class<?> objectClass, String[] paramNames, String[] paramValues) {
         Class<?> c = objectClass;
         Object obj = null;
@@ -183,5 +289,5 @@ public class ModelDriven {
 
         return obj;
     }
-
+    */
 }

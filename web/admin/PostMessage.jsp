@@ -16,36 +16,30 @@
         <script type="text/javascript">
             $(function(){
                 $('#btnPost').click(function(){
-                    var title = $("input[name=title]").val();
-                    var message = $("input[name=message]").val();
-                    var m_type = $("select[name=type]").val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '${hostURL}/admin/Message/PostAction',
-                        dataType: 'html',
-                        data: { title : title, message : message, type : m_type },
-                        success: function(data) {
+                    $.post('${hostURL}/admin/Message/PostAction', $('#fPostMessage').serialize(),
+                        function(data) {
                             $('#result').html(data);
                         }
-                    });
+                    );
                 });
             });
         </script>
     </head>
     <body>
-        <h1>Post Message</h1>
-        <p>Title: <input type="text" name="title"/></p>
-        <p>Message: <input type="text" name="message"/></p>
-        <p>Message for:
-            <select name="type">
-                <option value="1">All</option>
-                <option value="2">Student</option>
-                <option value="3">Faculty</option>
-            </select>
-        </p>
-        <p><input type="button" id="btnPost" value="Post"/></p>
-        <div id="result">
-        </div>
+        <form id="fPostMessage">
+            <h1>Post Message</h1>
+            <p>Title: <input type="text" name="title"/></p>
+            <p>Message: <input type="text" name="message"/></p>
+            <p>Message for:
+                <select name="type">
+                    <option value="1">All</option>
+                    <option value="2">Student</option>
+                    <option value="3">Faculty</option>
+                </select>
+            </p>
+            <p><input type="button" id="btnPost" value="Post"/></p>
+            <div id="result">
+            </div>
+        </form>
     </body>
 </html>

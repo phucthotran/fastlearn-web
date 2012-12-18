@@ -18,27 +18,18 @@
             $(function(){
 
                 $('#btnResponse').click(function(){
-                    var queryid = $("#queryid").val();
-                    var facultyid = $("#facultyid").val();
-                    var responsetext = $("#responseText").val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '${hostURL}/Faculty/Query/ResponseAction',
-                        dataType: 'html',
-                        data: { queryID : queryid, facultyID : facultyid, responseText : responsetext },
-                        success: function(data) {
+                    $.post('${hostURL}/Faculty/Query/ResponseAction', $('#fResponseQuery').serialize(),
+                        function(data) {
                             $('#reponseResult').html(data);
                         }
-                    });
+                    );
                 });
 
             });
         </script>
     </head>
     <body>
-        <c:set var="f" value="${faculty}"></c:set>
-        <input type="hidden" value="${f.facultyID}" id="facultyid"/>
+        <c:set var="f" value="${faculty}"></c:set>        
         <jsp:include page="module/Faculty_QueryNotification.jsp"></jsp:include>
         <jsp:include page="module/Navigation.jsp"></jsp:include>
         <jsp:include page="module/Notification.jsp"></jsp:include>
