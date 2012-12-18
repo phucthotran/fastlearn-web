@@ -14,26 +14,18 @@
         <script type="text/javascript">
             $(function(){
                 $('#btnAdd').click(function(){
-                    var name = $("input[name=name]").val();
-                    var fee = $("input[name=fee]").val();
-                    var prerequisites = $("input[name=prerequisites]").val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '${hostURL}/admin/Course/Add',
-                        dataType: 'html',
-                        data: { name : name, fee : fee,  prerequisites : prerequisites},
-                        success: function(data) {
+                    $.post('${hostURL}/admin/Course/AddAction', $('#fAddCourse').serialize(),
+                        function(data) {
                             $('#result').html(data);
                         }
-                    });
+                    );
                 });
             });
         </script>
     </head>
     <body>
         <h1>Add Course</h1>
-        <form action="${hostURL}/admin/Course/Add" method="POST">
+        <form id="fAddCourse">
             <p>Name: <input type="text" name="name"/></p>
             <p>Fee <input type="text" name="fee"/></p>
             <p>Prerequisites: <input type="text" name="prerequisites"/></p>

@@ -16,58 +16,39 @@
         <script type="text/javascript" src="${hostURL}/js/functions.js"></script>
         <script type="text/javascript">
             $(function(){
-                $('#btnPost').click(function(){
-                    var studentid = $("#studentid").val();
-                    var facultyid = $("#facultyid").val();
-                    var title = $("#queryTitle").val();
-                    var querytext = $("#queryText").val();
 
-                    $.ajax({
-                        type: 'POST',
-                        url: '${hostURL}/Student/Query/PostAction',
-                        dataType: 'html',
-                        data: { studentID : studentid, facultyID : facultyid, title : title, queryText : querytext },
-                        success: function(data) {
+                //POST QUERY
+                $('#btnPost').click(function(){
+                    $.post('${hostURL}/Student/Query/PostAction', $('#fPostQuery').serialize(),
+                        function(data) {
                             $('#queryResult').html(data);
                         }
-                    });
+                    );
                 });
 
+                //SEND FEEDBACK
                 $('#btnSendFB').click(function(){
-                    var studentid = $("#studentid").val();
-                    var fbtext = $("#fbText").val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '${hostURL}/Student/SendFeedback',
-                        dataType: 'html',
-                        data: { studentID : studentid, feedbackText : fbtext },
-                        success: function(data) {
+                    $.post('${hostURL}/Student/SendFeedbackAction', $('#fSendFB').serialize(),
+                        function(data) {
                             $('#fbResult').html(data);
                         }
-                    });
+                    );
                 });
 
-                $('#btnSearch').click(function(){
-                    var searchText = $("#searchText").val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '${hostURL}/Student/FindCourse',
-                        dataType: 'html',
-                        data: { searchtext : searchText },
-                        success: function(data) {
+                //SEARCH COURSE
+                $('#btnSearch').click(function(){                    
+                    $.post('${hostURL}/Student/FindCourseAction', $('#fSearchCourse').serialize(),
+                        function(data) {
                             $('#courseResult').html(data);
                         }
-                    });
+                    );
                 });
 
             });
         </script>
     </head>
     <body>
-        <c:set var="s" value="${student}"></c:set>
-        <input type="hidden" value="${s.studentID}" id="studentid"/>        
+        <c:set var="s" value="${student}"></c:set>      
         <jsp:include page="module/Navigation.jsp"></jsp:include>
         <jsp:include page="module/Student_QueryNotification.jsp"></jsp:include>
         <jsp:include page="module/Notification.jsp"></jsp:include>

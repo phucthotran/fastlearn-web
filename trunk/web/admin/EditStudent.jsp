@@ -25,7 +25,7 @@
 
                     $.ajax({
                         type: 'POST',
-                        url: '${hostURL}/admin/Student/Update',
+                        url: '${hostURL}/admin/Student/UpdateAction',
                         dataType: 'html',
                         data: { studentID : studentid, name : name, phone : phone,  email : email, address : address},
                         success: function(data) {
