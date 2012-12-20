@@ -10,11 +10,11 @@
             <th>Ngày</th>
             <th width="24"></th>
         </tr>
-        <c:forEach var="q" items="${f.queryDetails}">
+        <c:forEach var="q" items="${f.query}">
             <tr>
-                <td>${q.query.title}</td>
+                <td>${q.title}</td>
                 <td>${q.student.name}</td>
-                <td>${q.dateOfQuery}</td>
+                <td>${q.createdDate}</td>
                 <td width="24"><a title="Chi tiết" class="detailsButton" target="_blank" href="${hostURL}/Faculty/Query/View?id=${q.queryID}"></a></td>                
             </tr>
         </c:forEach>

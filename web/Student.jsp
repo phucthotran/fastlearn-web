@@ -26,6 +26,19 @@
                     );
                 });
 
+                //REPLY QUERY
+                $('#btnReply').click(function(){
+                    var queryid = $('input[name=queryID]').val();
+                    var querytext = $('textarea[name=queryText]').val();
+                    var facultyid = $('input[name=facultyID]').val();
+
+                    $.post('${hostURL}/Student/Query/ReplyAction', { queryID : queryid, queryText : querytext, facultyID : facultyid },
+                        function(data) {
+                            $('#replyResult').html(data);
+                        }
+                    );
+                });
+
                 //SEND FEEDBACK
                 $('#btnSendFB').click(function(){
                     $.post('${hostURL}/Student/SendFeedbackAction', $('#fSendFB').serialize(),

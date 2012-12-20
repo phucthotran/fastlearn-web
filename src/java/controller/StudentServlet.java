@@ -27,6 +27,7 @@ import library.ModelDriven;
     "/Student/Course/View",
     "/Student/Query/View",
     "/Student/Query/PostAction",
+    "/Student/Query/ReplyAction",
     "/Student/SendFeedbackAction",
     "/admin/StudentManage",
     "/admin/Student/Edit",
@@ -127,14 +128,24 @@ public class StudentServlet extends HttpServlet {
                 lstFaculty.add(details.getFaculty());
         }
 
-        List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(studentID);
+        ArrayList<List<QueryDetails>> lstNotification = new ArrayList<List<QueryDetails>>();
+
+        for(Faculty f : lstFaculty){
+            lstNotification.add(queryDetailsRm.getStudentNotification(f.getFacultyID()));
+        }
+
+        int countNotification = 0;
+
+        for(List<QueryDetails> item : lstNotification){
+            countNotification += item.size();
+        }
 
         request.setAttribute("VIEWTYPE", "FULL");
         request.setAttribute("lstFaculty", lstFaculty);
         request.setAttribute("student", student);
         request.setAttribute("lstMessage", messageRm.forStudent());
-        request.setAttribute("lstQuery", lstQuery);
-        request.setAttribute("queryCount", lstQuery.size());
+        request.setAttribute("lstNotification", lstNotification);
+        request.setAttribute("notificationCount", countNotification);
         forwardPage = "Student.jsp";
     }
 
@@ -259,11 +270,38 @@ public class StudentServlet extends HttpServlet {
 
             //queryDetailsRm.insert(queryDetails);
 
+            qr.setStudentID(studentID);
+
             qrDetails.setQuery(qr);
-            qrDetails.setStudentID(studentID);
+            qrDetails.setOwnerID(studentID);
+
             queryDetailsRm.insert(qrDetails);
 
             setMessage("Post query success");
+            request.setAttribute("message", message);
+            forwardPage = "../../do/success.jsp";
+        }
+    }
+
+    public void ReplyQueryAction(){
+        if(studentID == null) {
+            setMessage("Please login to perform this task");
+            request.setAttribute("message", message);
+            forwardPage = "../login.jsp";
+        }
+        else {
+            int queryID = Integer.parseInt(request.getParameter("queryID"));
+            String responseText = request.getParameter("responseText");
+            //String facultyID = request.getParameter("facultyID");
+
+            Query replyQuery = queryRm.find(queryID);
+
+            QueryDetails replayDetails = new QueryDetails(studentID, responseText);
+            replayDetails.setQuery(replyQuery);
+
+            queryDetailsRm.update(replayDetails);
+
+            setMessage("Reply query success");
             request.setAttribute("message", message);
             forwardPage = "../../do/success.jsp";
         }
@@ -350,6 +388,9 @@ public class StudentServlet extends HttpServlet {
             }
             else if(pathToPerform.equals("/Student/Query/PostAction")) {
                 PostQueryAction();
+            }
+            else if(pathToPerform.equals("/Student/Query/ReplyAction")) {
+                ReplyQueryAction();
             }
         }
         else if(loginType.equals("Admin")){
