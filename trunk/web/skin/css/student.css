@@ -383,6 +383,10 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.26);
 }
 
+#viewQueryBlock .blockContent p .solidTextarea {
+    width: 80%;
+}
+
 #viewCourseBlock {
     width: 95%;
     overflow: hidden;

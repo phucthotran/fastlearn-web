@@ -7,7 +7,7 @@
         <p>Tiêu Đề</p>
         <p><input class="solidTextbox" type="text" name="title"/></p>
         <p>Nội Dung</p>
-        <p><textarea class="solidTextarea" name="queryText"></textarea></p>
+        <p><textarea class="solidTextarea" name="responseText"></textarea></p>
         <p>Giảng Viên</p>
         <p>
             <select name="facultyID">

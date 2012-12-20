@@ -10,7 +10,7 @@
         <h5>Thoát</h5>
     </div>
     <div>
-        <a onclick="openNotification()" class="queryNotificationButton"><span class="queryCount">${queryCount}</span></a>
+        <a onclick="openNotification()" class="queryNotificationButton"><span class="queryCount">${notificationCount}</span></a>
         <h5>Nhắc Nhở</h5>
     </div>    
 </div>

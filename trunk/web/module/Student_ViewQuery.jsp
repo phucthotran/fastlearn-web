@@ -6,11 +6,15 @@
     <div class="blockContent">
         <h6>${q.title}</h6>
         <span class="sendTo">Gởi Tới Giảng Viên: ${q.faculty.name}</span>
+        <input type="hidden" value="${q.faculty.facultyID}" name="facultyID"/>
         <div class="queryContent">
-            <p class="sent">${q.queryText} (${q.dateOfQuery})</p>
-            <c:if test="${q.responseText != null}">
-                <p class="received">${q.responseText} (${q.dateOfResponse})</p>
-            </c:if>
+            <c:forEach var="qrd" items="${q.queryDetails}">
+                <p class="sent">${qrd.responseText} (${qrd.dateOfResponse})</p>
+            </c:forEach>
+            <input type="hidden" value="${q.queryID}" name="queryID"/>
+            <p><textarea class="solidTextarea" name="responseText"></textarea><br/><br/>
+            <input id="btnReply" class="redButton" type="button" value="Trả Lời"/></p>
+            <div id="replyResult"></div>
         </div>
     </div>
 </div>
