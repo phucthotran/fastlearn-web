@@ -14,11 +14,14 @@
         <title>Administrator</title>
     </head>
     <body>
+        <p><a href="${hostURL}/User/Logout">Thoát</a></p>
         <h1>Administrator</h1>
         <ul>
             <li><a href="StudentManage">Student Manage</a></li>
             <li><a href="CourseManage">Course Manage</a></li>
             <li><a href="MessageManage">Message Manage</a></li>
+            <li><a href="FeedbackManage">Feedback Manage</a></li>
+            <li><a href="FacultyManage">Faculty Manage</a></li>
         </ul>
     </body>
 </html>

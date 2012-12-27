@@ -14,32 +14,27 @@
         <script type="text/javascript">
             $(function(){
                 $('#btnFind').click(function(){
-                    var findText = $("#findText").val();
-                    var findType = $("#findType").val();
-
-                    $.ajax({
-                        type: 'GET',
-                        url: '${hostURL}/admin/Course/Find',
-                        dataType: 'html',
-                        data: { findtext : findText, findtype : findType},
-                        success: function(data) {
+                    $.post('${hostURL}/admin/Course/FindAction', $('#fFindCourse').serialize(),
+                        function(data) {
                             $('#result').html(data);
                         }
-                    });
+                    );
                 });
             });
         </script>
     </head>
     <body>
         <h1>Course Manage</h1>
-        <p>Find: <input type="text" id="findText"/>&nbsp;
-            By
-            <select id="findType">
-                <option value="name">Name</option>
-            </select>&nbsp;
-            <input type="button" id="btnFind" value="Find"/>
-        </p>
-        <div id="result"></div>
+        <form id="fFindCourse">
+            <p>Find: <input type="text" id="findText"/>&nbsp;
+                By
+                <select id="findType">
+                    <option value="name">Name</option>
+                </select>&nbsp;
+                <input type="button" id="btnFind" value="Find"/>
+            </p>
+            <div id="result"></div>
+        </form>
         <c:forEach var="c" items="${lstCourse}">
             <li>Name: ${c.name}, Fee: ${c.fee}&nbsp;
                 [<a href="${hostURL}/admin/Course/Info?id=${c.courseID}">Details</a>]

@@ -2,11 +2,11 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <div id="navigatorBlock" class="brownBlock">
     <div>
-        <a class="homeButton" href="index.jsp"></a>
+        <a class="homeButton" href="${hostURL}"></a>
         <h5>Trang Chủ</h5>
     </div>
     <div>
-        <a class="logoutButton" href="index.jsp"></a>
+        <a class="logoutButton" href="${hostURL}/User/Logout"></a>
         <h5>Thoát</h5>
     </div>
     <div>

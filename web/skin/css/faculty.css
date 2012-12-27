@@ -65,6 +65,16 @@ body {
     overflow: hidden;
 }
 
+#queryNotification a {
+    overflow: hidden;
+    display: block;
+    text-decoration: none;
+}
+
+#queryNotification a:hover {
+    opacity: 0.6;
+}
+
 #queryNotification li {
     list-style: none;
     background: transparent url('../transparent.png');

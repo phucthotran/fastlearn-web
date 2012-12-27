@@ -1,6 +1,6 @@
 <%-- 
-    Document   : studentManage
-    Created on : Dec 5, 2012, 10:21:09 AM
+    Document   : FacultyManage
+    Created on : Dec 27, 2012, 2:29:05 PM
     Author     : ITExplore
 --%>
 
@@ -12,7 +12,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Student Manage</title>
+        <title>Faculty Manage</title>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
         <script type="text/javascript">
             $(function(){
@@ -27,8 +27,8 @@
         </script>
     </head>
     <body>
-        <h1>Student</h1>
-        <form id="fFindSudent">
+        <h1>Faculty Manage</h1>
+        <form id="fFindFaculty">
             <p>Find: <input type="text" name="findText"/>&nbsp;
                 By
                 <select name="findType">
@@ -41,11 +41,11 @@
             <div id="result">
             </div>
         </form>
-        <c:forEach var="s" items="${lstStudent}">
-            <li>Name: ${s.name}, Email: ${s.email}, Address: ${s.address}&nbsp;
-                [<a href="${hostURL}/admin/Student/Info?id=${s.studentID}">Details</a>]
-                [<a href="${hostURL}/admin/Student/Edit?id=${s.studentID}">Edit</a>]
-                [<a href="${hostURL}/admin/Block?id=${s.studentID}">Block</a>]
+        <c:forEach var="f" items="${lstFaculty}">
+            <li>Name: ${f.name}, Address: ${f.address}&nbsp;
+                [<a href="${hostURL}/admin/Faculty/Info?id=${f.facultyID}">Details</a>]
+                [<a href="${hostURL}/admin/Faculty/Edit?id=${f.facultyID}">Edit</a>]
+                [<a href="${hostURL}/admin/Block?id=${f.facultyID}">Block</a>]
             </li>
         </c:forEach>
     </body>

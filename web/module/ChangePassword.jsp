@@ -13,4 +13,5 @@
     <ul class="navigator">
         <p><input id="btnChangePassword" class="redButton" type="button" value="Lưu"/></p>
     </ul>
+    <div id="changePasswordResult"></div>
 </div> <!-- END DIV#ChangePassBlock -->

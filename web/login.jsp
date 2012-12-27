@@ -17,7 +17,7 @@
 
                 $('#btnLogin').click(function(){
                     $.post('${hostURL}/User/LoginAction', $('#fLogin').serialize(),
-                        function(data) {
+                        function(data) {                            
                             if(data.indexOf('http') == -1)
                                 $('#resultLogin').html(data);
                             else
