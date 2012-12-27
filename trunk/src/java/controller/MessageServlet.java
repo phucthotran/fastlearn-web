@@ -54,6 +54,12 @@ public class MessageServlet extends HttpServlet {
 
     private String keyID = "";
     private String loginType = "";
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!response.isCommitted())
+            super.service(request, response);
+    }
    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pathToPerform = request.getServletPath();
@@ -64,13 +70,8 @@ public class MessageServlet extends HttpServlet {
 
         HttpSession LoginSs = request.getSession();
 
-        keyID = (String)LoginSs.getAttribute("userKeyId");
-        loginType = (String)LoginSs.getAttribute("loginType");
-
-        if(keyID.equals("") && loginType.equals("")) {
-            String hostURL = request.getServletContext().getAttribute("hostURL").toString();
-            response.sendRedirect(hostURL + "/login.jsp");
-        }
+        keyID = String.valueOf(LoginSs.getAttribute("userKeyId"));
+        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
     //TYPE : GET
@@ -159,7 +160,7 @@ public class MessageServlet extends HttpServlet {
         //String message_ = request.getParameter("message");
         //int type = Integer.parseInt(request.getParameter("type"));
 
-        Message editMessage = messageRm.find(msg.getMessage());
+        Message editMessage = messageRm.find(msg.getMessageID());
         editMessage.setTitle(msg.getTitle());
         editMessage.setMessage(msg.getMessage());
         editMessage.setType(msg.getType());
@@ -175,9 +176,6 @@ public class MessageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
-
-        if(!loginType.equals("Admin"))
-            return;
 
         if(pathToPerform.equals("/admin/MessageManage")) {
             MessageManagePage();
@@ -195,15 +193,13 @@ public class MessageServlet extends HttpServlet {
             PublishUnpublishMessage();
         }
 
-        request.getRequestDispatcher(forwardPage).forward(request, response);
+        if(forwardPage != null)
+            request.getRequestDispatcher(forwardPage).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
-
-        if(!loginType.equals("Admin"))
-            return;
 
         ModelDriven.setRequest(request);
 
@@ -224,7 +220,8 @@ public class MessageServlet extends HttpServlet {
             EditMessageAction();
         }
 
-        request.getRequestDispatcher(forwardPage).forward(request, response);
+        if(forwardPage != null)
+            request.getRequestDispatcher(forwardPage).forward(request, response);
     }
 
 }

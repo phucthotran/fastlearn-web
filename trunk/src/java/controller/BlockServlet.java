@@ -31,27 +31,24 @@ public class BlockServlet extends HttpServlet {
     private String keyID = "";
     private String loginType = "";
 
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!response.isCommitted())
+            super.service(request, response);
+    }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pathToPerform = request.getServletPath();
 
         HttpSession LoginSs = request.getSession();
 
-        keyID = (String)LoginSs.getAttribute("userKeyId");
-        loginType = (String)LoginSs.getAttribute("loginType");
-
-        if(keyID.equals("") && loginType.equals("")) {
-            String hostURL = request.getServletContext().getAttribute("hostURL").toString();
-            response.sendRedirect(hostURL + "/login.jsp");
-        }
+        keyID = String.valueOf(LoginSs.getAttribute("userKeyId"));
+        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
-
-        if(!loginType.equals("Admin")){
-            return;
-        }
 
         String id = request.getParameter("id");
 

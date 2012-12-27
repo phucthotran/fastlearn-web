@@ -57,6 +57,15 @@
                     );
                 });
 
+                //CHANGE PASSWORD
+                $('#btnChangePassword').click(function(){
+                    $.post('${hostURL}/User/ChangePasswordAction', $('#fChangePassword').serialize(),
+                        function(data) {
+                            $('#changePasswordResult').html(data);
+                        }
+                    );
+                });
+
             });
         </script>
     </head>

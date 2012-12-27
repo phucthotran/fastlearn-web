@@ -26,7 +26,7 @@ import library.ModelDriven;
     "/admin/Course/AddAction",
     "/admin/Course/Edit",
     "/admin/Course/UpdateAction",
-    "/admin/Course/Find",
+    "/admin/Course/FindAction",
     "/admin/Course/Info"
 })
 public class CourseServlet extends HttpServlet {
@@ -54,6 +54,12 @@ public class CourseServlet extends HttpServlet {
     private String keyID = "";
     private String loginType = "";
 
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!response.isCommitted())
+            super.service(request, response);
+    }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pathToPerform = request.getServletPath();
         response.setContentType("text/plain; charset=UTF-8");
@@ -63,13 +69,8 @@ public class CourseServlet extends HttpServlet {
 
         HttpSession LoginSs = request.getSession();
 
-        keyID = (String)LoginSs.getAttribute("userKeyId");
-        loginType = (String)LoginSs.getAttribute("loginType");
-
-        if(keyID.equals("") && loginType.equals("")) {
-            String hostURL = request.getServletContext().getAttribute("hostURL").toString();
-            response.sendRedirect(hostURL + "/login.jsp");
-        }
+        keyID = String.valueOf(LoginSs.getAttribute("userKeyId"));
+        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
     public void CourseManagePage(){
@@ -108,9 +109,10 @@ public class CourseServlet extends HttpServlet {
         }
     }
 
-    public void FindCourse(){
-        String findText = request.getParameter("findtext");
-        String findType = request.getParameter("findtype");
+    //TYPE : POST
+    public void FindCourseAction(){
+        String findText = request.getParameter("findText");
+        String findType = request.getParameter("findType");
 
         List<Course> lstCourse = null;
 
@@ -120,8 +122,7 @@ public class CourseServlet extends HttpServlet {
         request.setAttribute("lstCourse", lstCourse);
         forwardPage = "../FindCourseResult.jsp";
     }
-
-    //TYPE : POST
+    
     public void UpdateCourseAction(){
         //int courseid = Integer.parseInt(request.getParameter("courseId"));
         //String name = request.getParameter("name");
@@ -167,9 +168,6 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
 
-        if(!loginType.equals("Admin"))
-            return;
-
         if(pathToPerform.equals("/admin/CourseManage")) {
             CourseManagePage();
         }
@@ -178,10 +176,7 @@ public class CourseServlet extends HttpServlet {
         }        
         else if(pathToPerform.equals("/admin/Course/Edit")) {
             EditCourse();
-        }
-        else if(pathToPerform.equals("/admin/Course/Find")) {
-            FindCourse();
-        }
+        }        
 
         request.getRequestDispatcher(forwardPage).forward(request, response);
     } 
@@ -189,9 +184,6 @@ public class CourseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
-
-        if(!loginType.equals("Admin"))
-            return;
 
         ModelDriven.setRequest(request);
 
@@ -210,6 +202,9 @@ public class CourseServlet extends HttpServlet {
         }
         else if(pathToPerform.equals("/admin/Course/AddAction") && loginType.equals("Admin")) {
             AddCourseAction();
+        }
+        else if(pathToPerform.equals("/admin/Course/FindAction")) {
+            FindCourseAction();
         }
 
         request.getRequestDispatcher(forwardPage).forward(request, response);

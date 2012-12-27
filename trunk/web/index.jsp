@@ -35,7 +35,7 @@
             </div>
             <div class="clear"></div>
             <div class="greenBlock floatLeft" id="login">
-                <a href="login.jsp"><h4 class="blockTitle">Đăng Nhập</h4></a>
+                <a href="User/Login"><h4 class="blockTitle">Đăng Nhập</h4></a>
             </div>
             <div class="blueBlock floatLeft" id="contact">
                 <a href="contact.jsp"><h4 class="blockTitle">Thông Tin Liên Hệ</h4></a>

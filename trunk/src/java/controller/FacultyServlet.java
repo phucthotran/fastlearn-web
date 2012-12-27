@@ -1,5 +1,6 @@
 package controller;
 
+import anotation.MDO;
 import com.fastlearn.controller.*;
 import com.fastlearn.entity.*;
 import java.io.IOException;
@@ -7,6 +8,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import library.ModelDriven;
 
 /**
  *
@@ -22,7 +26,11 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name="FacultyServlet", urlPatterns={
     "/Faculty",
     "/Faculty/Query/View",
-    "/Faculty/Query/ResponseAction"
+    "/Faculty/Query/ResponseAction",
+    "/admin/FacultyManage",
+    "/admin/Faculty/Info",
+    "/admin/Faculty/Edit",
+    "/admin/Faculty/UpdateAction"
 })
 public class FacultyServlet extends HttpServlet {
    
@@ -34,6 +42,10 @@ public class FacultyServlet extends HttpServlet {
     private QueryFacadeRemote queryRm;
     @EJB
     private QueryDetailsFacadeRemote queryDetailsRm;
+
+    @MDO
+    private static Faculty facl;
+
     private String pathToPerform;
     private String forwardPage;
 
@@ -51,6 +63,12 @@ public class FacultyServlet extends HttpServlet {
     private String facultyID = "";
     private String loginType = "";
 
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!response.isCommitted())
+            super.service(request, response);
+    }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pathToPerform = request.getServletPath();
         response.setContentType("text/plain; charset=UTF-8");
@@ -60,16 +78,8 @@ public class FacultyServlet extends HttpServlet {
 
         HttpSession LoginSs = request.getSession();
 
-        //facultyID = (String)LoginSs.getAttribute("userKeyId");
-        //loginType = (String)LoginSs.getAttribute("loginType");
-
-        facultyID = "FL00000002";
-        loginType = "Faculty";
-
-        if(facultyID.equals("") && loginType.equals("")) {
-            String hostURL = request.getServletContext().getAttribute("hostURL").toString();
-            response.sendRedirect(hostURL + "/login.jsp");
-        }
+        facultyID = String.valueOf(LoginSs.getAttribute("userKeyId"));
+        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
     //TYPE : GET
@@ -117,6 +127,14 @@ public class FacultyServlet extends HttpServlet {
     public void ViewQuery(){
         int id = Integer.parseInt(request.getParameter("id"));
 
+        if(request.getParameter("markRead") != null){
+            int readID = Integer.parseInt(request.getParameter("markRead"));
+            QueryDetails markReadQuery = queryDetailsRm.find(readID);
+            markReadQuery.setIsRead(true);
+
+            queryDetailsRm.update(markReadQuery);
+        }
+
         Faculty faculty = facultyRm.find(facultyID);
 
         ArrayList<Student> lstStudent = new ArrayList<Student>();
@@ -158,6 +176,41 @@ public class FacultyServlet extends HttpServlet {
         forwardPage = "../../Faculty.jsp";
     }
 
+    public void FacultyManagePage(){
+        request.setAttribute("lstFaculty", facultyRm.findAll());
+        forwardPage = "FacultyManage.jsp";
+    }
+
+    public void FacultyInfo(){
+        String id = request.getParameter("id");
+
+        if(id == null) {
+            setMessage("Wrong URL");
+            request.setAttribute("message", message);
+            forwardPage = "../../do/error.jsp";
+        }
+        else {
+            Faculty faculty = facultyRm.find(id);
+            request.setAttribute("faculty", faculty);
+            forwardPage = "../FacultyInfo.jsp";
+        }
+    }
+
+    public void EditFaculty(){
+        String id = request.getParameter("id");
+
+        if(id == null) {
+            setMessage("Wrong URL");
+            request.setAttribute("message", message);
+            forwardPage = "../../do/error.jsp";
+        }
+        else {
+            Faculty facultyEdit = facultyRm.find(id);
+            request.setAttribute("faculty", facultyEdit);
+            forwardPage = "..//EditFaculty.jsp";
+        }
+    }
+
     //TYPE : POST
     public void ResponseAction(){
         Integer id = Integer.parseInt(request.getParameter("queryID"));
@@ -177,35 +230,74 @@ public class FacultyServlet extends HttpServlet {
         }
     }
 
+    public void UpdateFacultyAction(){
+        if(facl.getFacultyID() == null) {
+            setMessage("Not Found");
+            request.setAttribute("message", message);
+            forwardPage = "../../do/error.jsp";
+        }
+        else {
+            Faculty updateFaculty = facultyRm.find(facl.getFacultyID());
+            updateFaculty.setName(facl.getName());
+            updateFaculty.setAddress(facl.getAddress());
+
+            facultyRm.update(updateFaculty);
+
+            setMessage("Update success");
+            request.setAttribute("message", message);
+            forwardPage = "../../do/success.jsp";
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
 
-        if(!loginType.equals("Faculty"))
-            return;
-
         if(pathToPerform.equals("/Faculty")) {
             FacultyPage();
         }
-        if(pathToPerform.equals("/Faculty/Query/View")) {
+        else if(pathToPerform.equals("/Faculty/Query/View")) {
             ViewQuery();
         }
+        else if(pathToPerform.equals("/admin/FacultyManage")) {
+            FacultyManagePage();
+        }
+        else if(pathToPerform.equals("/admin/Faculty/Info")) {
+            FacultyInfo();
+        }
+        else if(pathToPerform.equals("/admin/Faculty/Edit")) {
+            EditFaculty();
+        }
 
-        request.getRequestDispatcher(forwardPage).forward(request, response);
+        if(forwardPage != null)
+            request.getRequestDispatcher(forwardPage).forward(request, response);
     } 
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
 
-        if(!loginType.equals("Faculty"))
-            return;
+        ModelDriven.setRequest(request);
+
+        try {
+            ModelDriven.parser(StudentServlet.class);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         if(pathToPerform.equals("/Faculty/Query/ResponseAction")) {
             ResponseAction();
         }
+        else if(pathToPerform.equals("/admin/Faculty/UpdateAction")) {
+            UpdateFacultyAction();
+        }
 
-        request.getRequestDispatcher(forwardPage).forward(request, response);
+        if(forwardPage != null)
+            request.getRequestDispatcher(forwardPage).forward(request, response);
     }
 
 }

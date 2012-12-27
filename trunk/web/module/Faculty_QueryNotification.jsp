@@ -4,10 +4,10 @@
     <div style="height: 24px; background: transparent url('${hostURL}/skin/closeNotification.png') 97% center no-repeat; cursor: pointer" title="Tắt" onclick="closeNotification()"></div>
     <c:forEach var="n" items="${lstNotification}">
         <c:forEach var="q" items="${n}">
-            <li>
+            <a href="${hostURL}/Faculty/Query/View?id=${q.queryID}&markRead=${q.id}"><li>
                 <p>${q.responseText}</p>
                 <p>${q.dateOfResponse}</p>
-            </li>
+            </li></a>
         </c:forEach>
     </c:forEach>
     <div title="Tắt" onclick="closeNotification()" class="closeNotification"></div>

@@ -16,7 +16,6 @@ import java.util.logging.*;
 import javax.servlet.http.HttpSession;
 import library.ModelDriven;
 
-
 /**
  *
  * @author ITExplore
@@ -32,7 +31,7 @@ import library.ModelDriven;
     "/admin/StudentManage",
     "/admin/Student/Edit",
     "/admin/Student/UpdateAction",
-    "/admin/Student/Find",
+    "/admin/Student/FindAction",
     "/admin/Student/Info"
 })
 public class StudentServlet extends HttpServlet {
@@ -71,40 +70,26 @@ public class StudentServlet extends HttpServlet {
         this.message = message;
     }
 
-    private String studentID = "";
-    private String loginType = "";
+    private String studentID = null;
+    private String loginType = null;
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!response.isCommitted())
+            super.service(request, response);
+    }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pathToPerform = request.getServletPath();
-        response.setContentType("text/plain; charset=UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         out = response.getWriter();
         this.request = request;
         this.response = response;
 
-        /*
-        Cookie[] ck = request.getCookies();
-
-        for(int i = 0; i < ck.length; i++) {            
-            if(ck[i].getName().equals("userKeyId")){
-                studentID = ck[i].getValue();
-            }
-            else if(ck[i].getName().equals("LoginType")){
-                loginType = ck[i].getValue();
-            }            
-        }
-        */
         HttpSession LoginSs = request.getSession();
 
-        //studentID = (String)LoginSs.getAttribute("userKeyId");
-        //loginType = (String)LoginSs.getAttribute("loginType");
-
-        studentID = "FL00000001";
-        loginType = "Student";
-
-        if(studentID.equals("") && loginType.equals("")) {
-            String hostURL = request.getServletContext().getAttribute("hostURL").toString();
-            response.sendRedirect(hostURL + "/login.jsp");
-        }
+        studentID = String.valueOf(LoginSs.getAttribute("userKeyId"));
+        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
     //TYPE : GET
@@ -210,9 +195,9 @@ public class StudentServlet extends HttpServlet {
         }
     }
 
-    public void FindStudent(){
-        String findText = request.getParameter("findtext");
-        String findType = request.getParameter("findtype");
+    public void FindStudentAction(){
+        String findText = request.getParameter("findText");
+        String findType = request.getParameter("findType");
 
         List<Student> lstStudent = null;
 
@@ -331,31 +316,24 @@ public class StudentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
-
-        if(loginType.equals("Student")){
-            if(pathToPerform.equals("/Student")) {
-                StudentPage();
-            }
-            else if(pathToPerform.equals("/Student/Query/View")) {
-                ViewQuery();
-            }
-            else if(pathToPerform.equals("/Student/Course/View")) {
-                ViewCourse();
-            }
+        
+        if(pathToPerform.equals("/Student")) {
+            StudentPage();
         }
-        else if(loginType.equals("Admin")){
-            if(pathToPerform.equals("/admin/StudentManage")) {
-                StudentManage();
-            }
-            else if(pathToPerform.equals("/admin/Student/Info")) {
-                StudentInfo();
-            }
-            else if(pathToPerform.equals("/admin/Student/Edit")) {
-                EditStudent();
-            }
-            else if(pathToPerform.equals("/admin/Student/Find")) {
-                FindStudent();
-            }
+        else if(pathToPerform.equals("/Student/Query/View")) {
+            ViewQuery();
+        }
+        else if(pathToPerform.equals("/Student/Course/View")) {
+            ViewCourse();
+        }
+        else if(pathToPerform.equals("/admin/StudentManage")) {
+            StudentManage();
+        }
+        else if(pathToPerform.equals("/admin/Student/Info")) {
+            StudentInfo();
+        }
+        else if(pathToPerform.equals("/admin/Student/Edit")) {
+            EditStudent();
         }
 
         if(forwardPage != null)
@@ -378,25 +356,24 @@ public class StudentServlet extends HttpServlet {
             Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        if(loginType.equals("Student")){
-            if(pathToPerform.equals("/Student/FindCourseAction")) {
-                FindCourseAction();
-            }
-            else if(pathToPerform.equals("/Student/SendFeedbackAction"))
-            {
-                SendFeedbackAction();
-            }
-            else if(pathToPerform.equals("/Student/Query/PostAction")) {
-                PostQueryAction();
-            }
-            else if(pathToPerform.equals("/Student/Query/ReplyAction")) {
-                ReplyQueryAction();
-            }
+        if(pathToPerform.equals("/Student/FindCourseAction")) {
+            FindCourseAction();
         }
-        else if(loginType.equals("Admin")){
-            if(pathToPerform.equals("/admin/Student/UpdateAction")) {
-                UpdateStudentAction();
-            }
+        else if(pathToPerform.equals("/Student/SendFeedbackAction"))
+        {
+            SendFeedbackAction();
+        }
+        else if(pathToPerform.equals("/Student/Query/PostAction")) {
+            PostQueryAction();
+        }
+        else if(pathToPerform.equals("/Student/Query/ReplyAction")) {
+            ReplyQueryAction();
+        }
+        else if(pathToPerform.equals("/admin/Student/UpdateAction")) {
+            UpdateStudentAction();
+        }
+        else if(pathToPerform.equals("/admin/Student/FindAction")) {
+            FindStudentAction();
         }
 
         if(forwardPage != null)
