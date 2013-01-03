@@ -12,17 +12,11 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Message Manage</title>
-        <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
-        <script type="text/javascript">
-            $(function(){
-                $('#include').load("${hostURL}/admin/Message/Post");
-            });
-        </script>
+        <title>Message Manage</title>        
     </head>
     <body>
         <h1>Message Manage</h1>
-        <div id="include"></div>
+        <jsp:include page="PostMessage.jsp"></jsp:include>
         <c:forEach var="m" items="${lstMessage}">
             <li>Title: ${m.title}, Date: ${m.date},
                 For:

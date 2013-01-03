@@ -14,6 +14,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Edit Student</title>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
+        <script type="text/javascript" src="${hostURL}/js/formValidate.js"></script>
         <script type="text/javascript">
             $(function(){
                 $('#btnEdit').click(function(){

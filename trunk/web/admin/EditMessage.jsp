@@ -14,10 +14,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Edit Message</title>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
+        <script type="text/javascript" src="${hostURL}/js/formValidate.js"></script>
         <script type="text/javascript">
             $(function(){
+                //VALIDATE
+                $('#mTitleBox').formValidate(3, 30, 'text', 'Hợp lệ', 'Không Hợp Lệ');
+                $('#mMessage').formValidate(20, 250, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+
                 $('#btnEdit').click(function(){
-                    $.post('${hostURL}/admin/Message/EditAction', $('#fEditMessage').serialize(),
+                    $.post('${hostURL}/admin/Message/UpdateAction', $('#fEditMessage').serialize(),
                         function(data) {
                             $('#result').html(data);
                         }
@@ -31,8 +36,8 @@
             <h1>Edit Message</h1>
             <c:set var="m" value="${message}"></c:set>
             <input type="hidden" name="messageID" value="${m.messageID}"/>
-            <p>Title: <input type="text" name="title" value="${m.title}"/></p>
-            <p>Message: <input type="text" name="message" value="${m.message}"/></p>
+            <p id="mTitleBox">Title: <input type="text" name="title" value="${m.title}"/><span class="message"></span></p>
+            <p id="mMessage">Message: <textarea type="text" name="message">${m.message}</textarea><span class="message"></span></p>
             <p>Message for:
                 <select name="type">
                     <option <c:if test="${m.type == 1}">selected</c:if> value="1">All</option>

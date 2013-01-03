@@ -28,6 +28,9 @@
     </head>
     <body>
         <h1>Student</h1>
+        <jsp:include page="AddStudent.jsp"></jsp:include>
+        <jsp:include page="StudentAssignInfo.jsp"></jsp:include>
+        <br/>
         <form id="fFindSudent">
             <p>Find: <input type="text" name="findText"/>&nbsp;
                 By
@@ -45,7 +48,8 @@
             <li>Name: ${s.name}, Email: ${s.email}, Address: ${s.address}&nbsp;
                 [<a href="${hostURL}/admin/Student/Info?id=${s.studentID}">Details</a>]
                 [<a href="${hostURL}/admin/Student/Edit?id=${s.studentID}">Edit</a>]
-                [<a href="${hostURL}/admin/Block?id=${s.studentID}">Block</a>]
+                [<a href="${hostURL}/admin/User/Block?id=${s.studentID}">Block</a>]
+                [<a href="${hostURL}/admin/User/Unblock?id=${s.studentID}">Unblock</a>]
             </li>
         </c:forEach>
     </body>

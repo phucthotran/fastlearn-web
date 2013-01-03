@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="f" value="${faculty}"></c:set>
 <div id="queryManageBlock" class="transparentBlock center">
     <h5 class="blockTitle">Vấn Đáp</h5>
@@ -14,7 +15,7 @@
             <tr>
                 <td>${q.title}</td>
                 <td>${q.student.name}</td>
-                <td>${q.createdDate}</td>
+                <td><fmt:formatDate pattern="dd/MM/yyyy hh:mm:ss" value="${q.createdDate}"/></td>
                 <td width="24"><a title="Chi tiết" class="detailsButton" target="_blank" href="${hostURL}/Faculty/Query/View?id=${q.queryID}"></a></td>                
             </tr>
         </c:forEach>

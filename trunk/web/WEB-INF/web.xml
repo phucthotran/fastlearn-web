@@ -2,11 +2,11 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <context-param>
         <param-name>studentPages</param-name>
-        <param-value>/Student,/Student/FindCourseAction,/Student/Course/View,/Student/Query/View,/Student/Query/PostAction,/Student/Query/ReplyAction,/Student/SendFeedbackAction</param-value>
+        <param-value>/Student,/Student/FindCourseAction,/Student/Course/View,/Student/Query/View,/Student/Query/PostAction,/Student/Query/ResponseAction,/Student/Feedback/PostAction</param-value>
     </context-param>
     <context-param>
         <param-name>adminPages</param-name>
-        <param-value>/admin/StudentManage,/admin/CourseManage,/admin/Course/FindAction,/admin/Course/Edit,/admin/Course/UpdateAction,/admin/Course/Info,/admin/Block,/admin/Unblock,/admin/MessageManage,/admin/Message/Post,/admin/Message/PostAction,/admin/Message/Edit,/admin/Message/EditAction,/admin/Message/Remove,/admin/Message/Publish,/admin/Message/Unpublish,/admin/FeedbackManage,/admin/FacultyManage,/admin/Faculty/Info,/admin/Faculty/Edit,/admin/Faculty/UpdateAction</param-value>
+        <param-value>/admin/StudentManage,/admin/Student/Info,/admin/Student/AddAction,/admin/Student/Edit,/admin/Student/UpdateAction,/admin/Student/FindAction,/admin/CourseManage,/admin/Course/FindAction,/admin/Course/Edit,/admin/Course/UpdateAction,/admin/Student/AssignInfoAction,/admin/Course/Info,/admin/User/Block,/admin/User/Unblock,/admin/MessageManage,/admin/Message/Post,/admin/Message/PostAction,/admin/Message/Edit,/admin/Message/UpdatetAction,/admin/Message/Remove,/admin/Message/Publish,/admin/Message/Unpublish,/admin/FeedbackManage,/admin/FacultyManage,/admin/Faculty/Info,/admin/Faculty/AddAction,/admin/Faculty/Edit,/admin/Faculty/UpdateAction,/admin/Faculty/CourseAssignAction</param-value>
     </context-param>
     <context-param>
         <param-name>facultyPages</param-name>

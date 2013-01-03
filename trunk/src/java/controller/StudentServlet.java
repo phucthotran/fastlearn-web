@@ -2,19 +2,18 @@ package controller;
 
 import com.fastlearn.controller.*;
 import com.fastlearn.entity.*;
-import java.io.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import anotation.*;
 import java.util.ArrayList;
-import java.util.logging.*;
+import javax.annotation.Resource;
+import javax.ejb.TransactionManagement;
 import javax.servlet.http.HttpSession;
-import library.ModelDriven;
+import javax.transaction.*;
+import model.CustomServlet;
 
 /**
  *
@@ -22,19 +21,24 @@ import library.ModelDriven;
  */
 @WebServlet(name="StudentServlet", urlPatterns={
     "/Student",
-    "/Student/FindCourseAction",
-    "/Student/Course/View",
     "/Student/Query/View",
+    "/Student/Course/View",    
     "/Student/Query/PostAction",
-    "/Student/Query/ReplyAction",
-    "/Student/SendFeedbackAction",
+    "/Student/Query/ResponseAction",
+    "/Student/Feedback/PostAction",
+    "/Student/FindCourseAction",
     "/admin/StudentManage",
+    "/admin/Student/Info",
+    "/admin/Student/AddAction",
     "/admin/Student/Edit",
     "/admin/Student/UpdateAction",
     "/admin/Student/FindAction",
-    "/admin/Student/Info"
+    "/admin/Student/AssignInfoAction"
 })
-public class StudentServlet extends HttpServlet {
+@TransactionManagement
+public class StudentServlet extends CustomServlet {
+    @Resource
+    private UserTransaction userTrans;
 
     @EJB
     private StudentFacadeRemote studentRm;
@@ -48,54 +52,33 @@ public class StudentServlet extends HttpServlet {
     private QueryDetailsFacadeRemote queryDetailsRm;
     @EJB
     private FeedbackFacadeRemote fbRm;
-
-    @MDO
-    private static Student std;
-    @MDO
-    private static Query qr;
-    @MDO
-    private static QueryDetails qrDetails;
-
-    private PrintWriter out = null;
-
-    private HttpServletRequest request = null;
-    private HttpServletResponse response = null;
-
-    private String pathToPerform;
-    private String forwardPage;
-
-    private String message;
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
+    @EJB
+    private KeyGenerateFacadeRemote keyRm;
+    @EJB
+    private UsersFacadeRemote userRm;
+    @EJB
+    private FacultyFacadeRemote facultyRm;
+    @EJB
+    private StudyCenterFacadeRemote centerRm;
+    @EJB
+    private StudentDetailsFacadeRemote studentDetailsRm;
 
     private String studentID = null;
-    private String loginType = null;
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if(!response.isCommitted())
-            super.service(request, response);
-    }
-
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        pathToPerform = request.getServletPath();
-        response.setContentType("text/html; charset=UTF-8");
-        out = response.getWriter();
-        this.request = request;
-        this.response = response;
-
-        HttpSession LoginSs = request.getSession();
-
+    public void processRequest(){
+        HttpSession LoginSs = getRequest().getSession();
         studentID = String.valueOf(LoginSs.getAttribute("userKeyId"));
-        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
-
-    //TYPE : GET
-    public void StudentPage(){
+    
+    private ArrayList<Faculty> lstFaculty;
+    private ArrayList<List<QueryDetails>> lstNotification;
+    private int countNotification;
+    
+    public void getFaculties(){
         Student student = studentRm.find(studentID);
-        ArrayList<Faculty> lstFaculty = new ArrayList<Faculty>();
+        
+        lstFaculty = new ArrayList<Faculty>();
 
         //Get Faculty Lít (Not Duplication)
         for(StudentDetails details : student.getStudentDetails()) {
@@ -112,92 +95,236 @@ public class StudentServlet extends HttpServlet {
             if(!duplication)
                 lstFaculty.add(details.getFaculty());
         }
+    }
 
-        ArrayList<List<QueryDetails>> lstNotification = new ArrayList<List<QueryDetails>>();
+    public void getNotification(){
+        lstNotification = new ArrayList<List<QueryDetails>>();
 
         for(Faculty f : lstFaculty){
             lstNotification.add(queryDetailsRm.getStudentNotification(f.getFacultyID()));
         }
 
-        int countNotification = 0;
+        countNotification = 0;
 
         for(List<QueryDetails> item : lstNotification){
             countNotification += item.size();
         }
-
-        request.setAttribute("VIEWTYPE", "FULL");
-        request.setAttribute("lstFaculty", lstFaculty);
-        request.setAttribute("student", student);
-        request.setAttribute("lstMessage", messageRm.forStudent());
-        request.setAttribute("lstNotification", lstNotification);
-        request.setAttribute("notificationCount", countNotification);
-        forwardPage = "Student.jsp";
     }
 
+    @TaskToPerform(pathToPerform = "/Student", forwardPage = "Student.jsp")
+    public void StudentPage(){
+        getFaculties();
+        getNotification();
+
+        setAttribute("VIEWTYPE", "FULL");
+        setAttribute("lstFaculty", lstFaculty);
+        setAttribute("student", studentRm.find(studentID));
+        setAttribute("lstMessage", messageRm.forStudent());
+        setAttribute("lstNotification", lstNotification);
+        setAttribute("notificationCount", countNotification);
+    }
+
+    @TaskToPerform(pathToPerform = "/Student/Query/View", forwardPage = "../../Student.jsp")
     public void ViewQuery(){
-        int id = Integer.parseInt(request.getParameter("id"));
+        int id = Integer.parseInt(getParams().get("id"));
 
-        List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(studentID);
+        getFaculties();
+        getNotification();
 
-        request.setAttribute("VIEWTYPE", "QUERY");
-        request.setAttribute("student", studentRm.find(studentID));
-        request.setAttribute("query", queryRm.find(id));
-        request.setAttribute("lstQuery", lstQuery);
-        request.setAttribute("queryCount", lstQuery.size());
-        forwardPage = "../../Student.jsp";
+        setAttribute("VIEWTYPE", "QUERY");
+        setAttribute("student", studentRm.find(studentID));
+        setAttribute("query", queryRm.find(id));
+        setAttribute("lstMessage", messageRm.forStudent());
+        setAttribute("lstNotification", lstNotification);
+        setAttribute("notificationCount", countNotification);
     }
 
+    @TaskToPerform(pathToPerform = "/Student/Course/View", forwardPage = "../../Student.jsp")
     public void ViewCourse() {
-        int id = Integer.parseInt(request.getParameter("id"));
+        int id = Integer.parseInt(getParams().get("id"));
 
-        List<QueryDetails> lstQuery = queryDetailsRm.getStudentNotification(studentID);
+        getFaculties();
+        getNotification();
 
-        request.setAttribute("VIEWTYPE", "COURSE");
-        request.setAttribute("student", studentRm.find(studentID));
-        request.setAttribute("course", courseRm.find(id));
-        request.setAttribute("lstQuery", lstQuery);
-        request.setAttribute("queryCount", lstQuery.size());
-        forwardPage = "../../Student.jsp";
+        setAttribute("VIEWTYPE", "COURSE");
+        setAttribute("student", studentRm.find(studentID));
+        setAttribute("course", courseRm.find(id));
+        setAttribute("lstMessage", messageRm.forStudent());
+        setAttribute("lstNotification", lstNotification);
+        setAttribute("notificationCount", countNotification);
     }
 
+    @TaskToPerform(pathToPerform = "/Student/Query/PostAction")
+    public void PostQueryAction(){
+        String facultyID = getParams().get("facultyID");
+        String title = getParams().get("title");
+        String responseText = getParams().get("responseText");
+
+        Query postQuery = new Query(title, facultyID, studentID);
+        QueryDetails queryDetails = new QueryDetails(studentID, responseText);
+        queryDetails.setQuery(postQuery);
+
+        queryDetailsRm.insert(queryDetails);
+
+        setResponseMessage("Gửi truy vấn thành công");
+    }
+
+    @TaskToPerform(pathToPerform = "/Student/Query/ResponseAction")
+    public void ResponseQueryAction(){
+        int queryID = Integer.parseInt(getParams().get("queryID"));
+        String responseText = getParams().get("responseText");
+
+        Query replyQuery = queryRm.find(queryID);
+
+        QueryDetails replayDetails = new QueryDetails(studentID, responseText);
+        replayDetails.setQuery(replyQuery);
+
+        queryDetailsRm.update(replayDetails);
+
+        setResponseMessage("Trả lời truy vấn thành công");
+    }
+
+    @TaskToPerform(pathToPerform = "/Student/Feedback/PostAction")
+    public void SendFeedbackAction(){
+        String feedbackText = getParams().get("feedbackText");
+
+        Feedback newFeedback = new Feedback(studentID, feedbackText);
+        fbRm.insert(newFeedback);
+
+        setResponseMessage("Send feedback success");
+    }
+
+    @TaskToPerform(pathToPerform = "/Student/FindCourseAction", forwardPage = "../module/Student_FindCourseResult.jsp")
+    public void FindCourseAction(){
+        String searchText = getParams().get("searchText");
+
+        List<Course> lstCourse = courseRm.findByName(searchText);
+        setAttribute("lstCourse", lstCourse);
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/StudentManage", forwardPage = "StudentManage.jsp")
     public void StudentManage() {
-        request.setAttribute("lstStudent", studentRm.findAll());
-        forwardPage = "StudentManage.jsp";
+        setAttribute("lstStudent", studentRm.findAll());
+        setAttribute("lstCourse", courseRm.findAll());
+        setAttribute("lstFaculty", facultyRm.findAll());
+        setAttribute("lstCenter", centerRm.findAll());
     }
 
+    @TaskToPerform(pathToPerform = "/admin/Student/Info", forwardPage = "../StudentInfo.jsp")
     public void StudentInfo() {
-        String id = request.getParameter("id");
+        String id = getParams().get("id");
 
         if(id == null) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
+            setResponseMessage("Wrong URL");
+            return;
         }
-        else {
-            Student student = studentRm.find(id);
-            request.setAttribute("student", student);
-            forwardPage = "../StudentInfo.jsp";
+        
+        Student student = studentRm.find(id);
+        setAttribute("student", student);
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/Student/AddAction")
+    public void AddStudentAction(){
+        boolean raiseException = false;
+        String name = getParams().get("name");
+        String phone = getParams().get("phone");
+        String email = getParams().get("email");
+        String address = getParams().get("address");
+
+        if(email.length() == 0)
+            email = null;
+
+        try {
+            userTrans.begin();
+
+            String codeID = keyRm.insertKey();
+            Users newUser = new Users(email, "fastlearn", codeID, true, false, false);
+            Student newStudent = new Student(codeID, name, phone, email, address);
+
+            userRm.insert(newUser);
+            studentRm.insert(newStudent);
+
+            setResponseMessage("Thêm học viên mới thành công. CodeID: " + codeID);
+            userTrans.commit();
+        } catch (NotSupportedException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (SystemException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (RollbackException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (HeuristicMixedException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (HeuristicRollbackException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (SecurityException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (IllegalStateException ex) {
+            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        }
+        finally {
+            if(raiseException) {
+                try {
+                    userTrans.rollback();
+                    setResponseMessage("Có lỗi trong quá trình thực hiện. Hệ thống đã phục hồi lại trạng thái ban đầu");
+                } catch (IllegalStateException ex) {
+                    Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SystemException ex) {
+                    Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 
+    @TaskToPerform(pathToPerform = "/admin/Student/Edit", forwardPage = "../EditStudent.jsp")
     public void EditStudent(){
-        String id = request.getParameter("id");
+        String id = getParams().get("id");
 
         if(id == null) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
+            setResponseMessage("Wrong URL");
+            return;
         }
-        else {
-            Student studentEdit = studentRm.find(id);
-            request.setAttribute("student", studentEdit);
-            forwardPage = "..//EditStudent.jsp";
-        }
+        
+        Student studentEdit = studentRm.find(id);
+        setAttribute("student", studentEdit);
     }
 
+    @TaskToPerform(pathToPerform = "/admin/Student/UpdateAction")
+    public void UpdateStudentAction(){
+        String studentid = getParams().get("studentID");
+        String name = getParams().get("name");
+        String phone = getParams().get("phone");
+        String email = getParams().get("email");
+        String address = getParams().get("address");
+
+        if(studentid == null || studentid.length() < 10) {
+            setResponseMessage("Not Found");
+            return;
+         }
+        
+        Student updateStudent = studentRm.find(studentid);
+        updateStudent.setName(name);
+        updateStudent.setPhone(phone);
+        updateStudent.setEmail(email);
+        updateStudent.setAddress(address);
+
+        studentRm.update(updateStudent);
+
+        setResponseMessage("Cập nhập thông tin học viên thành công");
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/Student/FindAction", forwardPage = "../FindStudentResult.jsp")
     public void FindStudentAction(){
-        String findText = request.getParameter("findText");
-        String findType = request.getParameter("findType");
+        String findText = getParams().get("findText");
+        String findType = getParams().get("findType");
 
         List<Student> lstStudent = null;
 
@@ -208,176 +335,25 @@ public class StudentServlet extends HttpServlet {
         else if(findType.equals("address"))
             lstStudent = studentRm.findByAddress(findText);
 
-        request.setAttribute("lstStudent", lstStudent);
-
-        forwardPage = "../FindStudentResult.jsp";
+        setAttribute("lstStudent", lstStudent);
     }
 
-    //TYPE : POST
-    public void FindCourseAction(){
-        String searchText = request.getParameter("searchtext");
+    @TaskToPerform(pathToPerform = "/admin/Student/AssignInfoAction")
+    public void AssignInfoAction(){
+        String facultyid = getParams().get("facultyID");
+        String studentid = getParams().get("studentID");
+        Integer courseid = Integer.parseInt(getParams().get("courseID"));
+        Integer centerid = Integer.parseInt(getParams().get("centerID"));
 
-        if(searchText == null)
-            searchText = "";
-
-        List<Course> lstCourse = courseRm.findByName(searchText);
-        request.setAttribute("lstCourse", lstCourse);
-        forwardPage = "../module/Student_FindCourseResult.jsp";
-    }
-
-    public void SendFeedbackAction(){
-        String feedbackText = request.getParameter("feedbackText");
-
-        if(studentID != null) {
-            Feedback newFeedback = new Feedback(studentID, feedbackText);
-            fbRm.insert(newFeedback);
-
-            setMessage("Send feedback success");
-            request.setAttribute("message", message);
-            forwardPage = "../do/success.jsp";
-        }
-    }
-
-    public void PostQueryAction(){
-        //String facultyID = request.getParameter("facultyID");
-        //String title = request.getParameter("title");
-        //String queryText = request.getParameter("queryText");
-
-        if(studentID == null) {
-            setMessage("Please login to perform this task");
-            request.setAttribute("message", message);
-            forwardPage = "../login.jsp";
-        }
-        else {
-            //Query postQuery = new Query(title);
-            //QueryDetails queryDetails = new QueryDetails(studentID, facultyID, queryText);
-            //queryDetails.setQuery(postQuery);
-
-            //queryDetailsRm.insert(queryDetails);
-
-            qr.setStudentID(studentID);
-
-            qrDetails.setQuery(qr);
-            qrDetails.setOwnerID(studentID);
-
-            queryDetailsRm.insert(qrDetails);
-
-            setMessage("Post query success");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    public void ReplyQueryAction(){
-        if(studentID == null) {
-            setMessage("Please login to perform this task");
-            request.setAttribute("message", message);
-            forwardPage = "../login.jsp";
-        }
-        else {
-            int queryID = Integer.parseInt(request.getParameter("queryID"));
-            String responseText = request.getParameter("responseText");
-            //String facultyID = request.getParameter("facultyID");
-
-            Query replyQuery = queryRm.find(queryID);
-
-            QueryDetails replayDetails = new QueryDetails(studentID, responseText);
-            replayDetails.setQuery(replyQuery);
-
-            queryDetailsRm.update(replayDetails);
-
-            setMessage("Reply query success");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    public void UpdateStudentAction(){
-        if(std.getStudentID() == null) {
-            setMessage("Not Found");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
-        }
-        else {
-            Student updateStudent = studentRm.find(std.getStudentID());
-            updateStudent.setName(std.getName());
-            updateStudent.setPhone(std.getPhone());
-            updateStudent.setEmail(std.getEmail());
-            updateStudent.setAddress(std.getAddress());
-
-            studentRm.update(updateStudent);
-
-            setMessage("Update success");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        processRequest(request, response);
-        
-        if(pathToPerform.equals("/Student")) {
-            StudentPage();
-        }
-        else if(pathToPerform.equals("/Student/Query/View")) {
-            ViewQuery();
-        }
-        else if(pathToPerform.equals("/Student/Course/View")) {
-            ViewCourse();
-        }
-        else if(pathToPerform.equals("/admin/StudentManage")) {
-            StudentManage();
-        }
-        else if(pathToPerform.equals("/admin/Student/Info")) {
-            StudentInfo();
-        }
-        else if(pathToPerform.equals("/admin/Student/Edit")) {
-            EditStudent();
+        if(studentDetailsRm.isAssigned(studentid, facultyid, courseid, centerid)){
+            setResponseMessage("Assigned");
+            return;
         }
 
-        if(forwardPage != null)
-            request.getRequestDispatcher(forwardPage).forward(request, response);
-    } 
+        StudentDetails assignStudentInfo = new StudentDetails(studentid, facultyid, courseid, centerid);
+        studentDetailsRm.insert(assignStudentInfo);
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        processRequest(request, response);
-
-        ModelDriven.setRequest(request);
-
-        try {
-            ModelDriven.parser(StudentServlet.class);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        if(pathToPerform.equals("/Student/FindCourseAction")) {
-            FindCourseAction();
-        }
-        else if(pathToPerform.equals("/Student/SendFeedbackAction"))
-        {
-            SendFeedbackAction();
-        }
-        else if(pathToPerform.equals("/Student/Query/PostAction")) {
-            PostQueryAction();
-        }
-        else if(pathToPerform.equals("/Student/Query/ReplyAction")) {
-            ReplyQueryAction();
-        }
-        else if(pathToPerform.equals("/admin/Student/UpdateAction")) {
-            UpdateStudentAction();
-        }
-        else if(pathToPerform.equals("/admin/Student/FindAction")) {
-            FindStudentAction();
-        }
-
-        if(forwardPage != null)
-            request.getRequestDispatcher(forwardPage).forward(request, response);
+        setResponseMessage("Assign completed");
     }
 
 }

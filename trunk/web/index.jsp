@@ -6,6 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -22,7 +23,7 @@
                     <c:forEach var="m" items="${lstMessage}">
                         <div>
                             <h5>${m.title}</h5>
-                            <p>${m.date}</p>
+                            <p><fmt:formatDate pattern="dd/MM/yyyy hh:mm:ss" value="${m.date}"/></p>
                             <p>${m.message}</p>
                         </div>
                     </c:forEach>

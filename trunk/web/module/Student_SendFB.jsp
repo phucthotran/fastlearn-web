@@ -2,7 +2,7 @@
 <div id="sendFeedbackBlock" class="transparentBlock center">
     <h5 class="blockTitle">Gửi Phản Hồi</h5>
     <form id="fSendFB" class="blockContent">
-        <p><textarea class="solidTextarea" name="feedbackText"></textarea></p>
+        <p id="fbTextBox"><textarea class="solidTextarea" name="feedbackText"></textarea><br/><span class="message"></span></p>
         <div id="fbResult"></div>
     </form>
     <div class="clear"></div>

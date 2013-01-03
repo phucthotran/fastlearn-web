@@ -3,11 +3,11 @@
     <h5 class="blockTitle">Đổi Mật Khẩu</h5>
     <form id="fChangePassword" class="blockContent">
         <p>Mật Khẩu Hiện Tại</p>
-        <p><input class="solidTextbox" type="text" name="currentPassword"/></p>
+        <p id="currentPwdBox"><input class="solidTextbox" type="password" name="currentPassword"/><span class="message"></span></p>
         <p>Mật Khẩu Mới</p>
-        <p><input class="solidTextbox" type="password" name="newPassword"/></p>
+        <p id="newPwdBox"><input class="solidTextbox" type="password" name="newPassword"/><span class="message"></span></p>
         <p>Xác Nhận Lại</p>
-        <p><input class="solidTextbox" type="password" name="newPasswordAgain"/></p>
+        <p id="newPwdAgainBox"><input class="solidTextbox" type="password" name="newPasswordAgain"/><span class="message"></span></p>
     </form>
     <div class="clear"></div>
     <ul class="navigator">

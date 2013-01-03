@@ -12,8 +12,12 @@
         <title>Đăng Nhập</title>
         <link rel="stylesheet" type="text/css" href="${hostURL}/skin/css/login.css"/>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
+        <script type="text/javascript" src="${hostURL}/js/formValidate.js"></script>
         <script type="text/javascript">
             $(function(){
+
+                $('#keyIdBox').formValidate(10, 10, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                $('#pwdBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
 
                 $('#btnLogin').click(function(){
                     $.post('${hostURL}/User/LoginAction', $('#fLogin').serialize(),
@@ -34,8 +38,10 @@
                 <p id="resultLogin">${message}</p>
                 <h4 class="blockTitle">Đăng Nhập</h4>
                 <form id="fLogin" class="blockContent">
-                    <p><span>Mã Code: </span> <input class="solidTextbox floatRight" type="text" name="userKeyId"/></p>
-                    <p><span>Mật Khẩu: </span><input class="solidTextbox floatRight" type="password" name="password"/></p>
+                    <p id="keyIdBox">
+                        <span>Mã Code: </span> <input class="solidTextbox floatRight" type="text" name="userKeyId"/><span class="message"></span>
+                    </p>
+                    <p id="pwdBox"><span>Mật Khẩu: </span><input class="solidTextbox floatRight" type="password" name="password"/><span class="message"></p>
                 </form>
                 <div class="clear"></div>
                 <ul class="navigator">
