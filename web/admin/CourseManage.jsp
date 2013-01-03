@@ -25,10 +25,11 @@
     </head>
     <body>
         <h1>Course Manage</h1>
+        <jsp:include page="AddCourse.jsp"></jsp:include>
         <form id="fFindCourse">
-            <p>Find: <input type="text" id="findText"/>&nbsp;
+            <p>Find: <input type="text" name="findText"/>&nbsp;
                 By
-                <select id="findType">
+                <select name="findType">
                     <option value="name">Name</option>
                 </select>&nbsp;
                 <input type="button" id="btnFind" value="Find"/>

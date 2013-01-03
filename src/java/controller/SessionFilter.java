@@ -73,6 +73,23 @@ public class SessionFilter implements Filter {
         String currentURL = req.getServletPath();
         boolean allowRequest = false;
 
+        HttpSession ss = req.getSession(false);
+
+        if(ss != null){
+            String loginType = String.valueOf(ss.getAttribute("loginType"));
+
+            if(currentURL.equals("/User/Login")){
+                if(loginType.equals("Student"))
+                    resp.sendRedirect(rootPath + "/Student");
+                else if(loginType.equals("Faculty"))
+                    resp.sendRedirect(rootPath + "/Faculty");
+                else if(loginType.equals("Admin"))
+                    resp.sendRedirect(rootPath + "/admin");
+            }
+            chain.doFilter(request, response);
+            return;
+        }
+
         if(studentPages.contains(currentURL)){
             allowRequest = true;
         }
@@ -112,7 +129,7 @@ public class SessionFilter implements Filter {
     }
 
     @Override
-    public void destroy() {        
+    public void destroy() {
     }
 
 }

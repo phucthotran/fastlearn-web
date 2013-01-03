@@ -22,6 +22,7 @@
             <li><a href="MessageManage">Message Manage</a></li>
             <li><a href="FeedbackManage">Feedback Manage</a></li>
             <li><a href="FacultyManage">Faculty Manage</a></li>
+            <li><a href="ChangePassword.jsp">Change Password</a></li>
         </ul>
     </body>
 </html>

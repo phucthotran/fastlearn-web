@@ -13,8 +13,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Post Message</title>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
+        <script type="text/javascript" src="${hostURL}/js/formValidate.js"></script>
         <script type="text/javascript">
             $(function(){
+                //VALIDATE
+                $('#mTitleBox').formValidate(3, 30, 'text', 'Hợp lệ', 'Không Hợp Lệ');
+                $('#mMessage').formValidate(20, 250, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+
                 $('#btnPost').click(function(){
                     $.post('${hostURL}/admin/Message/PostAction', $('#fPostMessage').serialize(),
                         function(data) {
@@ -27,9 +32,9 @@
     </head>
     <body>
         <form id="fPostMessage">
-            <h1>Post Message</h1>
-            <p>Title: <input type="text" name="title"/></p>
-            <p>Message: <input type="text" name="message"/></p>
+            <h3>Post Message</h3>
+            <p id="mTitleBox">Title: <input type="text" name="title"/><span class="message"></span></p>
+            <p id="mMessage">Message: <textarea type="text" name="message"></textarea><span class="message"></span></p>
             <p>Message for:
                 <select name="type">
                     <option value="1">All</option>

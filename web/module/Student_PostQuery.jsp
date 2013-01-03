@@ -5,16 +5,16 @@
     <h5 class="blockTitle">Gửi Câu Hỏi Cho Giảng Viên</h5>
     <form id="fPostQuery" class="blockContent">
         <p>Tiêu Đề</p>
-        <p><input class="solidTextbox" type="text" name="title"/></p>
+        <p id="qTitleBox"><input class="solidTextbox" type="text" name="title"/><span class="message"></span></p>
         <p>Nội Dung</p>
-        <p><textarea class="solidTextarea" name="responseText"></textarea></p>
+        <p id="qResponseTextBox"><textarea class="solidTextarea" name="responseText"></textarea><br/><span class="message"></span></p>
         <p>Giảng Viên</p>
         <p>
             <select name="facultyID">
                 <c:forEach var="f" items="${lstFaculty}">
                     <option value="${f.facultyID}">${f.name}</option>
                 </c:forEach>
-            </select>
+            </select>            
         </p>
         <div id="queryResult"></div>
     </form>

@@ -12,10 +12,18 @@
         <title>Sinh Viên</title>
         <link rel="stylesheet" type="text/css" href="${hostURL}/skin/css/student.css"/>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
+        <script type="text/javascript" src="${hostURL}/js/formValidate.js"></script>
         <script type="text/javascript" src="${hostURL}/js/events.js"></script>
         <script type="text/javascript" src="${hostURL}/js/functions.js"></script>
         <script type="text/javascript">
             $(function(){
+                //VALIDATE
+                var b1 = $('#currentPwdBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                var b2 = $('#newPwdBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                var b3 = $('#newPwdAgainBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                var b4 = $('#qTitleBox').formValidate(10, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                var b5 = $('#qResponseTextBox').formValidate(10, 250, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                var b6 = $('#fbTextBox').formValidate(10, 500, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
 
                 //POST QUERY
                 $('#btnPost').click(function(){
@@ -29,10 +37,10 @@
                 //REPLY QUERY
                 $('#btnReply').click(function(){
                     var queryid = $('input[name=queryID]').val();
-                    var querytext = $('textarea[name=queryText]').val();
+                    var responsetext = $('textarea[name=responseText]').val();
                     var facultyid = $('input[name=facultyID]').val();
 
-                    $.post('${hostURL}/Student/Query/ReplyAction', { queryID : queryid, queryText : querytext, facultyID : facultyid },
+                    $.post('${hostURL}/Student/Query/ResponseAction', { queryID : queryid, responseText : responsetext, facultyID : facultyid },
                         function(data) {
                             $('#replyResult').html(data);
                         }
@@ -41,7 +49,10 @@
 
                 //SEND FEEDBACK
                 $('#btnSendFB').click(function(){
-                    $.post('${hostURL}/Student/SendFeedbackAction', $('#fSendFB').serialize(),
+                    if(!b6)
+                        return;
+
+                    $.post('${hostURL}/Student/Feedback/PostAction', $('#fSendFB').serialize(),
                         function(data) {
                             $('#fbResult').html(data);
                         }
@@ -65,7 +76,6 @@
                         }
                     );
                 });
-
             });
         </script>
     </head>
@@ -80,7 +90,6 @@
             <c:set var="view" value="${VIEWTYPE}"></c:set>
             <c:if test="${view == 'FULL'}">
                 <jsp:include page="module/Student_SearchCourse.jsp"></jsp:include>
-                <jsp:include page="module/CourseMaterial.jsp"></jsp:include>
                 <jsp:include page="module/Student_QueryManage.jsp"></jsp:include>
                 <jsp:include page="module/ChangePassword.jsp"></jsp:include>
                 <jsp:include page="module/Student_PostQuery.jsp"></jsp:include>

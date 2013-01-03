@@ -28,7 +28,6 @@ public class FastLearnContextListener implements ServletContextListener {
         context.setAttribute("hostURL", "http://localhost:8080" + context.getContextPath());
         context.setAttribute("realPath", context.getRealPath("/"));
         context.setAttribute("lstMessage", messageRm.forEverybody());
-
     }
 
     @Override

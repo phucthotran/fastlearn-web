@@ -1,38 +1,38 @@
 package controller;
 
-import anotation.MDO;
+import anotation.TaskToPerform;
 import com.fastlearn.controller.*;
 import com.fastlearn.entity.*;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import library.ModelDriven;
+import javax.transaction.*;
+import model.CustomServlet;
 
 /**
  *
  * @author ITExplore
  */
-@WebServlet(name="FacultyServlet", urlPatterns={
+@WebServlet(name="FacultyServlet", urlPatterns = {
     "/Faculty",
     "/Faculty/Query/View",
     "/Faculty/Query/ResponseAction",
     "/admin/FacultyManage",
     "/admin/Faculty/Info",
+    "/admin/Faculty/AddAction",
     "/admin/Faculty/Edit",
-    "/admin/Faculty/UpdateAction"
+    "/admin/Faculty/UpdateAction",
+    "/admin/Faculty/CourseAssignAction"
 })
-public class FacultyServlet extends HttpServlet {
+public class FacultyServlet extends CustomServlet {
+
+    @Resource
+    private UserTransaction userTrans;
    
     @EJB
     private FacultyFacadeRemote facultyRm;
@@ -42,51 +42,30 @@ public class FacultyServlet extends HttpServlet {
     private QueryFacadeRemote queryRm;
     @EJB
     private QueryDetailsFacadeRemote queryDetailsRm;
-
-    @MDO
-    private static Faculty facl;
-
-    private String pathToPerform;
-    private String forwardPage;
-
-    private PrintWriter out = null;
-
-    private HttpServletRequest request = null;
-    private HttpServletResponse response = null;
-
-    private String message;
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
+    @EJB
+    private KeyGenerateFacadeRemote keyRm;
+    @EJB
+    private UsersFacadeRemote userRm;
+    @EJB
+    private CourseFacadeRemote courseRm;
+    @EJB
+    private FacultyDetailsFacadeRemote facultyDetailsRm;
 
     private String facultyID = "";
-    private String loginType = "";
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if(!response.isCommitted())
-            super.service(request, response);
-    }
-
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        pathToPerform = request.getServletPath();
-        response.setContentType("text/plain; charset=UTF-8");
-        out = response.getWriter();
-        this.request = request;
-        this.response = response;
-
-        HttpSession LoginSs = request.getSession();
-
+    public void processRequest(){
+        HttpSession LoginSs = getRequest().getSession();
         facultyID = String.valueOf(LoginSs.getAttribute("userKeyId"));
-        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
-    //TYPE : GET
-    public void FacultyPage() {
-        Faculty faculty = facultyRm.find(facultyID);
+    private ArrayList<Student> lstStudent;
+    private ArrayList<List<QueryDetails>> lstNotification;
+    private int countNotification;
 
-        ArrayList<Student> lstStudent = new ArrayList<Student>();
+    public void getStudents(){
+        Faculty faculty = facultyRm.find(facultyID);
+        lstStudent = new ArrayList<Student>();
 
         //Get Faculty Lít (Not Duplication)
         for(StudentDetails details : faculty.getStudentDetails()) {
@@ -103,201 +82,193 @@ public class FacultyServlet extends HttpServlet {
             if(!duplication)
                 lstStudent.add(details.getStudent());
         }
+    }
 
-        ArrayList<List<QueryDetails>> lstNotification = new ArrayList<List<QueryDetails>>();
+    public void getNotification(){
+        lstNotification = new ArrayList<List<QueryDetails>>();
 
         for(Student s : lstStudent){
             lstNotification.add(queryDetailsRm.getStudentNotification(s.getStudentID()));
         }
 
-        int countNotification = 0;
+        countNotification = 0;
 
         for(List<QueryDetails> item : lstNotification){
             countNotification += item.size();
         }
-
-        request.setAttribute("VIEWTYPE", "FULL");
-        request.setAttribute("faculty", facultyRm.find(facultyID));
-        request.setAttribute("lstMessage", messageRm.forFaculty());
-        request.setAttribute("lstNotification", lstNotification);
-        request.setAttribute("notificationCount", countNotification);
-        forwardPage = "Faculty.jsp";
     }
 
-    public void ViewQuery(){
-        int id = Integer.parseInt(request.getParameter("id"));
+    @TaskToPerform(pathToPerform = "/Faculty", forwardPage = "Faculty.jsp")
+    public void FacultyPage() {       
 
-        if(request.getParameter("markRead") != null){
-            int readID = Integer.parseInt(request.getParameter("markRead"));
+        getStudents();
+        getNotification();
+
+        setAttribute("VIEWTYPE", "FULL");
+        setAttribute("faculty", facultyRm.find(facultyID));
+        setAttribute("lstMessage", messageRm.forFaculty());
+        setAttribute("lstNotification", lstNotification);
+        setAttribute("notificationCount", countNotification);        
+    }
+
+    @TaskToPerform(pathToPerform = "/Faculty/Query/View", forwardPage = "../../Faculty.jsp")
+    public void ViewQuery(){
+        int id = Integer.parseInt(getParams().get("id"));
+
+        if(getParams().get("markRead") != null){
+            int readID = Integer.parseInt(getParams().get("markRead"));
             QueryDetails markReadQuery = queryDetailsRm.find(readID);
             markReadQuery.setIsRead(true);
 
             queryDetailsRm.update(markReadQuery);
         }
 
-        Faculty faculty = facultyRm.find(facultyID);
+        getStudents();
+        getNotification();
 
-        ArrayList<Student> lstStudent = new ArrayList<Student>();
-
-        //Get Faculty Lít (Not Duplication)
-        for(StudentDetails details : faculty.getStudentDetails()) {
-            boolean duplication = false;
-            String studentName = details.getStudent().getName();
-
-            for(Student std : lstStudent) {
-                if(std.getName().equals(studentName)) {
-                    duplication = true;
-                    break;
-                }
-            }
-
-            if(!duplication)
-                lstStudent.add(details.getStudent());
-        }
-
-        ArrayList<List<QueryDetails>> lstNotification = new ArrayList<List<QueryDetails>>();
-
-        for(Student s : lstStudent){
-            lstNotification.add(queryDetailsRm.getStudentNotification(s.getStudentID()));
-        }
-
-        int countNotification = 0;
-
-        for(List<QueryDetails> item : lstNotification){
-            countNotification += item.size();
-        }
-
-        request.setAttribute("VIEWTYPE", "QUERY");
-        request.setAttribute("faculty", faculty);
-        request.setAttribute("query", queryRm.find(id));
-        request.setAttribute("lstNotification", lstNotification);
-        request.setAttribute("notificationCount", countNotification);
-        request.setAttribute("lstMessage", messageRm.forFaculty());
-        forwardPage = "../../Faculty.jsp";
+        setAttribute("VIEWTYPE", "QUERY");
+        setAttribute("faculty", facultyRm.find(facultyID));
+        setAttribute("query", queryRm.find(id));
+        setAttribute("lstMessage", messageRm.forFaculty());
+        setAttribute("lstNotification", lstNotification);
+        setAttribute("notificationCount", countNotification);
     }
 
+    @TaskToPerform(pathToPerform = "/Faculty/ResponseAction")
+    public void ResponseFacultyAction(){
+        Integer id = Integer.parseInt(getParams().get("queryID"));
+        String responseText = getParams().get("responseText");
+
+        Query responseQuery = queryRm.find(id);
+
+        QueryDetails responseDetails = new QueryDetails(facultyID, responseText);
+        responseDetails.setQuery(responseQuery);
+
+        queryDetailsRm.update(responseDetails);
+
+        setResponseMessage("Trả lời truy vấn thành công");
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/FacultyManage", forwardPage = "FacultyManage.jsp")
     public void FacultyManagePage(){
-        request.setAttribute("lstFaculty", facultyRm.findAll());
-        forwardPage = "FacultyManage.jsp";
+        setAttribute("lstCourse", courseRm.findAll());
+        setAttribute("lstFaculty", facultyRm.findAll());
     }
 
+    @TaskToPerform(pathToPerform = "/admin/Faculty/Info", forwardPage = "../FacultyInfo.jsp")
     public void FacultyInfo(){
-        String id = request.getParameter("id");
+        String id = getParams().get("id");
 
         if(id == null) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
+            setResponseMessage("Wrong URL");
+            return;
         }
-        else {
-            Faculty faculty = facultyRm.find(id);
-            request.setAttribute("faculty", faculty);
-            forwardPage = "../FacultyInfo.jsp";
-        }
+
+        Faculty faculty = facultyRm.find(id);
+        setAttribute("faculty", faculty);
     }
 
-    public void EditFaculty(){
-        String id = request.getParameter("id");
-
-        if(id == null) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
-        }
-        else {
-            Faculty facultyEdit = facultyRm.find(id);
-            request.setAttribute("faculty", facultyEdit);
-            forwardPage = "..//EditFaculty.jsp";
-        }
-    }
-
-    //TYPE : POST
-    public void ResponseAction(){
-        Integer id = Integer.parseInt(request.getParameter("queryID"));
-        String responseText = request.getParameter("responseText");
-
-        if(facultyID != null) {
-            Query responseQuery = queryRm.find(id);
-
-            QueryDetails responseDetails = new QueryDetails(facultyID, responseText);
-            responseDetails.setQuery(responseQuery);
-
-            queryDetailsRm.update(responseDetails);
-
-            setMessage("Answer query success");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    public void UpdateFacultyAction(){
-        if(facl.getFacultyID() == null) {
-            setMessage("Not Found");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
-        }
-        else {
-            Faculty updateFaculty = facultyRm.find(facl.getFacultyID());
-            updateFaculty.setName(facl.getName());
-            updateFaculty.setAddress(facl.getAddress());
-
-            facultyRm.update(updateFaculty);
-
-            setMessage("Update success");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        processRequest(request, response);
-
-        if(pathToPerform.equals("/Faculty")) {
-            FacultyPage();
-        }
-        else if(pathToPerform.equals("/Faculty/Query/View")) {
-            ViewQuery();
-        }
-        else if(pathToPerform.equals("/admin/FacultyManage")) {
-            FacultyManagePage();
-        }
-        else if(pathToPerform.equals("/admin/Faculty/Info")) {
-            FacultyInfo();
-        }
-        else if(pathToPerform.equals("/admin/Faculty/Edit")) {
-            EditFaculty();
-        }
-
-        if(forwardPage != null)
-            request.getRequestDispatcher(forwardPage).forward(request, response);
-    } 
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        processRequest(request, response);
-
-        ModelDriven.setRequest(request);
+    @TaskToPerform(pathToPerform = "/admin/Faculty/AddAction")
+    public void AddFacultyAction() throws RollbackException{
+        boolean raiseException = false;
+        String name = getParams().get("name");
+        String address = getParams().get("address");
+        String email = getParams().get("email");
 
         try {
-            ModelDriven.parser(StudentServlet.class);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            userTrans.begin();
+
+            String codeID = keyRm.insertKey();
+            Users newUser = new Users(email, "fastlearn", codeID, false, true, false);
+            Faculty newFaculty = new Faculty(codeID, name, email, address);
+
+            userRm.insert(newUser);
+            facultyRm.insert(newFaculty);
+
+            setResponseMessage("Thêm giảng viên mới thành công. CodeID: " + codeID);
+            userTrans.commit();
+        } catch (NotSupportedException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (SystemException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (RollbackException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (HeuristicMixedException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (HeuristicRollbackException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (SecurityException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        } catch (IllegalStateException ex) {
+            Logger.getLogger(FacultyServlet.class.getName()).log(Level.SEVERE, null, ex);
+            raiseException = true;
+        }
+        finally {
+            if(raiseException) {
+                try {
+                    userTrans.rollback();
+                    setResponseMessage("Có lỗi trong quá trình thực hiện. Hệ thống đã phục hồi lại trạng thái ban đầu");
+                } catch (IllegalStateException ex) {
+                    Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SystemException ex) {
+                    Logger.getLogger(StudentServlet.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/Faculty/Edit", forwardPage = "../EditFaculty.jsp")
+    public void EditFaculty(){
+        String id = getParams().get("id");
+
+        if(id == null) {
+            setResponseMessage("Wrong URL");
+            return;
         }
 
-        if(pathToPerform.equals("/Faculty/Query/ResponseAction")) {
-            ResponseAction();
-        }
-        else if(pathToPerform.equals("/admin/Faculty/UpdateAction")) {
-            UpdateFacultyAction();
-        }
+        Faculty facultyEdit = facultyRm.find(id);
+        setAttribute("faculty", facultyEdit);
+    }
 
-        if(forwardPage != null)
-            request.getRequestDispatcher(forwardPage).forward(request, response);
+    @TaskToPerform(pathToPerform = "/admin/Faculty/UpdateAction")
+    public void UpdateFacultyAction(){
+        String facultyid = getParams().get("facultyID");
+        String name = getParams().get("name");
+        String email = getParams().get("email");
+        String address = getParams().get("address");
+        
+        Faculty updateFaculty = facultyRm.find(facultyid);
+        updateFaculty.setName(name);
+        updateFaculty.setEmail(email);
+        updateFaculty.setAddress(address);
+
+        facultyRm.update(updateFaculty);
+
+        setResponseMessage("Cập nhập thông tin giảng viên thành công");
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/Faculty/CourseAssignAction")
+    public void CourseAssignAction(){
+        String facultyid = getParams().get("facultyID");
+        Integer courseid = Integer.parseInt(getParams().get("courseID"));
+
+        if(facultyDetailsRm.isAssigned(facultyid, courseid)){
+            setResponseMessage("Assigned");
+            return;
+        }
+        
+        FacultyDetails facultyAssign = new FacultyDetails(facultyid, courseid);
+        facultyDetailsRm.insert(facultyAssign);
+
+        setResponseMessage("Assign completed");
     }
 
 }

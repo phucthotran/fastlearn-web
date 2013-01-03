@@ -1,20 +1,16 @@
 package controller;
 
-import anotation.MDO;
+import anotation.TaskToPerform;
 import com.fastlearn.controller.MessageFacadeRemote;
 import com.fastlearn.entity.Message;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import library.ModelDriven;
+import model.CustomServlet;
 
 /**
  *
@@ -22,206 +18,110 @@ import library.ModelDriven;
  */
 @WebServlet(name="MessageServlet", urlPatterns={
     "/admin/MessageManage",
-    "/admin/Message/Post",
     "/admin/Message/PostAction",
     "/admin/Message/Edit",
-    "/admin/Message/EditAction",
+    "/admin/Message/UpdateAction",
     "/admin/Message/Remove",
     "/admin/Message/Publish",
     "/admin/Message/Unpublish"
 })
-public class MessageServlet extends HttpServlet {
+public class MessageServlet extends CustomServlet {
 
     @EJB
     private MessageFacadeRemote messageRm;
 
-    @MDO
-    private Message msg;
-
-    private String pathToPerform;
-    private String forwardPage;
-
-    private PrintWriter out = null;
-
-    private HttpServletRequest request = null;
-    private HttpServletResponse response = null;
-
-    private String message;
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     private String keyID = "";
-    private String loginType = "";
-
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if(!response.isCommitted())
-            super.service(request, response);
-    }
    
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        pathToPerform = request.getServletPath();
-        response.setContentType("text/plain; charset=UTF-8");
-        out = response.getWriter();
-        this.request = request;
-        this.response = response;
-
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {        
         HttpSession LoginSs = request.getSession();
 
         keyID = String.valueOf(LoginSs.getAttribute("userKeyId"));
-        loginType = String.valueOf(LoginSs.getAttribute("loginType"));
     }
 
-    //TYPE : GET
+    @TaskToPerform(pathToPerform = "/admin/MessageManage", forwardPage = "MessageManage.jsp")
     public void MessageManagePage(){
-        request.setAttribute("lstMessage", messageRm.findAll());
-        forwardPage = "MessageManage.jsp";
+        setAttribute("lstMessage", messageRm.findAll());
     }
 
-    public void PostMessage(){
-        forwardPage = "../PostMessage.jsp";
-    }
-
-    public void EditMessage(){
-        int id = Integer.parseInt(request.getParameter("id"));
-
-        if(id == 0) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
-        }
-        else {
-            Message editMessage = messageRm.find(id);
-            request.setAttribute("message", editMessage);
-            forwardPage = "../EditMessage.jsp";
-        }
-    }
-
-    public void RemoveMessage(){
-        int id = Integer.parseInt(request.getParameter("id"));
-
-        if(id == 0) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
-        }
-        else {
-            messageRm.remove(id);
-            setMessage("Remove message succcess");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    public void PublishUnpublishMessage(){
-        int id = Integer.parseInt(request.getParameter("id"));
-
-        if(id == 0) {
-            setMessage("Wrong URL");
-            request.setAttribute("message", message);
-            forwardPage = "../../do/error.jsp";
-        }
-        else {
-            if(pathToPerform.equals("/admin/Message/Publish")) {
-                messageRm.publish(id);
-                setMessage("Publish message success");
-            }
-            else if(pathToPerform.equals("/admin/Message/Unpublish")) {
-                messageRm.unpublish(id);
-                setMessage("Unpublish message success");
-            }
-
-            request.setAttribute("message", message);
-            forwardPage = "../../do/success.jsp";
-        }
-    }
-
-    //TYPE : POST
+    @TaskToPerform(pathToPerform = "/admin/Message/PostAction")
     public void PostMessageAction(){
-        //String title = request.getParameter("title");
-        //String message_ = request.getParameter("message");
-        //int type = Integer.parseInt(request.getParameter("type"));
+        String title = getParams().get("title");
+        String message = getParams().get("message");
+        int type = Integer.parseInt(getParams().get("type"));
 
-        //Message newMessage = new Message(title, message_, type);
-        //messageRm.insert(newMessage);
+        Message newMessage = new Message(title, message, type);
+        messageRm.insert(newMessage);
 
-        messageRm.insert(msg);
-
-        setMessage("Post message success");
-        request.setAttribute("message", message);
-        forwardPage = "../../do/success.jsp";
+        setResponseMessage("Đăng thông báo thành công");
     }
 
-    public void EditMessageAction(){
-        //int id = Integer.parseInt(request.getParameter("id"));
-        //String title = request.getParameter("title");
-        //String message_ = request.getParameter("message");
-        //int type = Integer.parseInt(request.getParameter("type"));
+    @TaskToPerform(pathToPerform = "/admin/Message/Edit", forwardPage = "../EditMessage.jsp")
+    public void EditMessage(){
+        int id = Integer.parseInt(getParams().get("id"));
 
-        Message editMessage = messageRm.find(msg.getMessageID());
-        editMessage.setTitle(msg.getTitle());
-        editMessage.setMessage(msg.getMessage());
-        editMessage.setType(msg.getType());
+        if(id == 0) {
+            setResponseMessage("Not Found");
+            return;
+        }
+        
+        Message editMessage = messageRm.find(id);
+        setAttribute("message", editMessage);
+    }
+
+    @TaskToPerform(pathToPerform = "/admin/Message/UpdateAction")
+    public void EditMessageAction(){
+        int id = Integer.parseInt(getParams().get("messageID"));
+        String title = getParams().get("title");
+        String message = getParams().get("message");
+        int type = Integer.parseInt(getParams().get("type"));
+
+        Message editMessage = messageRm.find(id);
+        editMessage.setTitle(title);
+        editMessage.setMessage(message);
+        editMessage.setType(type);
 
         messageRm.update(editMessage);
 
-        setMessage("Edit Success");
-        request.setAttribute("message", message);
-
-        forwardPage = "../../do/success.jsp";
+        setResponseMessage("Sửa thông báo thành công");
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        processRequest(request, response);
+    @TaskToPerform(pathToPerform = "/admin/Message/Remove")
+    public void RemoveMessage(){
+        int id = Integer.parseInt(getParams().get("id"));
 
-        if(pathToPerform.equals("/admin/MessageManage")) {
-            MessageManagePage();
+        if(id == 0) {
+            setResponseMessage("Not Found");
+            return;
         }
-        else if(pathToPerform.equals("/admin/Message/Post")) {
-            PostMessage();
-        }
-        else if(pathToPerform.equals("/admin/Message/Edit")) {
-            EditMessage();
-        }
-        else if(pathToPerform.equals("/admin/Message/Remove")) {
-            RemoveMessage();
-        }
-        else if(pathToPerform.equals("/admin/Message/Publish") || pathToPerform.equals("/admin/Message/Unpublish")) {
-            PublishUnpublishMessage();
-        }
-
-        if(forwardPage != null)
-            request.getRequestDispatcher(forwardPage).forward(request, response);
+        
+        messageRm.remove(id);
+        setResponseMessage("Xóa thông báo thành công");
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        processRequest(request, response);
+    @TaskToPerform(pathToPerform = "/admin/Message/Publish")
+    public void PublishUnpublishMessage(){
+        int id = Integer.parseInt(getParams().get("id"));
 
-        ModelDriven.setRequest(request);
+        if(id == 0) {
+            setResponseMessage("Not Found");
+            return;
+        }
+                  
+        messageRm.publish(id);
+        setResponseMessage("Hiệu lực thông báo thành công");
+    }
 
-        try {
-            ModelDriven.parser(MessageServlet.class);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(MessageServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(MessageServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(MessageServlet.class.getName()).log(Level.SEVERE, null, ex);
+    @TaskToPerform(pathToPerform = "/admin/Message/Unpublish")
+    public void UnpublishMessage(){
+        int id = Integer.parseInt(getParams().get("id"));
+
+        if(id == 0) {
+            setResponseMessage("Not Found");
+            return;
         }
 
-        if(pathToPerform.equals("/admin/Message/PostAction")) {
-            PostMessageAction();
-        }
-        else if(pathToPerform.equals("/admin/Message/EditAction")) {
-            EditMessageAction();
-        }
-
-        if(forwardPage != null)
-            request.getRequestDispatcher(forwardPage).forward(request, response);
+        messageRm.unpublish(id);
+        setResponseMessage("Ẩn thông báo thành công");
     }
 
 }

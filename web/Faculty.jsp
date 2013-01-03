@@ -12,6 +12,7 @@
         <title>Giảng Viên</title>
         <link rel="stylesheet" type="text/css" href="${hostURL}/skin/css/faculty.css"/>
         <script type="text/javascript" src="${hostURL}/js/jquery.js"></script>
+        <script type="text/javascript" src="${hostURL}/js/formValidate.js"></script>
         <script type="text/javascript" src="${hostURL}/js/events.js"></script>
         <script type="text/javascript" src="${hostURL}/js/functions.js"></script>
         <script type="text/javascript">
@@ -33,6 +34,12 @@
                     );
                 });
 
+                //VALIDATE
+                $('#currentPwdBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                $('#newPwdBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                $('#newPwdAgainBox').formValidate(8, 50, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+                $('#qResponseTextBox').formValidate(10, 250, 'mixed', 'Hợp lệ', 'Không Hợp Lệ');
+
             });
         </script>
     </head>
@@ -46,7 +53,6 @@
             <h4 class="blockTitle">Giảng Viên</h4>
             <c:set var="view" value="${VIEWTYPE}"></c:set>
             <c:if test="${view == 'FULL'}">
-                <jsp:include page="module/CourseMaterial.jsp"></jsp:include>
                 <jsp:include page="module/Faculty_QueryManage.jsp"></jsp:include>
                 <jsp:include page="module/ChangePassword.jsp"></jsp:include>
             </c:if>

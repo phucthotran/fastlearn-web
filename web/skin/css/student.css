@@ -34,6 +34,7 @@ body {
     height: 50px;
     position: relative;
     cursor: pointer;
+    text-decoration: none;
 }
 
 #navigatorBlock .queryNotificationButton .queryCount {

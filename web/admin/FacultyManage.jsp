@@ -19,7 +19,7 @@
                 $('#btnFind').click(function(){
                     $.post('${hostURL}/admin/Student/FindAction', $('#fFindSudent').serialize(),
                         function(data) {
-                            $('#result').html(data);
+                            $('#findFacultyResult').html(data);
                         }
                     );
                 });
@@ -28,6 +28,8 @@
     </head>
     <body>
         <h1>Faculty Manage</h1>
+        <jsp:include page="AddFaculty.jsp"></jsp:include>
+        <jsp:include page="CourseAssign.jsp"></jsp:include>
         <form id="fFindFaculty">
             <p>Find: <input type="text" name="findText"/>&nbsp;
                 By
@@ -38,14 +40,15 @@
                 </select>&nbsp;
                 <input type="button" id="btnFind" value="Find"/>
             </p>
-            <div id="result">
+            <div id="findFacultyResult">
             </div>
         </form>
         <c:forEach var="f" items="${lstFaculty}">
             <li>Name: ${f.name}, Address: ${f.address}&nbsp;
                 [<a href="${hostURL}/admin/Faculty/Info?id=${f.facultyID}">Details</a>]
                 [<a href="${hostURL}/admin/Faculty/Edit?id=${f.facultyID}">Edit</a>]
-                [<a href="${hostURL}/admin/Block?id=${f.facultyID}">Block</a>]
+                [<a href="${hostURL}/admin/User/Block?id=${f.facultyID}">Block</a>]
+                [<a href="${hostURL}/admin/User/Unblock?id=${s.studentID}">Unblock</a>]
             </li>
         </c:forEach>
     </body>
